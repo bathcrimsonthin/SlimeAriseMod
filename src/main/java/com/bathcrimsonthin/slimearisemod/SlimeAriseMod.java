@@ -1,6 +1,7 @@
 package com.bathcrimsonthin.slimearisemod;
 
 import com.bathcrimsonthin.slimearisemod.entity.ModEntities;
+import com.bathcrimsonthin.slimearisemod.item.ModItemGroups;
 import com.bathcrimsonthin.slimearisemod.item.ModItems;
 import com.bathcrimsonthin.slimearisemod.particle.ModParticles;
 import net.fabricmc.api.ModInitializer;
@@ -17,6 +18,7 @@ public class SlimeAriseMod implements ModInitializer {
 	@Override
 	public void onInitialize() {
 		ModItems.registerModItems();
+		ModItemGroups.registerItemGroups();
 		ModEntities.registerModEntities();
 		ModParticles.registerModParticles();
 	}

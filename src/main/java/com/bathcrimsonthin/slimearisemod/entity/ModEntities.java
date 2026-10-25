@@ -19,6 +19,7 @@ public class ModEntities {
                     .eyeHeight(0.325f)
                     .spawnDimensionsScale(4.0f)
                     .clientTrackingRange(10)
+                    .fireImmune() // 炎・溶岩耐性
                     .build("blaze_slime")
     );
 
