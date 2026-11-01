@@ -96,16 +96,15 @@ public class BlazeSlimeEntity extends Slime {
         this.goalSelector.addGoal(1, new BlazeSlimeFireballGoal(this));
     }
 
-    // --- ブレイズと同等仕様の火球攻撃 Goal ---
+    // --- 火球攻撃 & 追尾 Goal ---
     static class BlazeSlimeFireballGoal extends Goal {
         private final BlazeSlimeEntity slime;
-        private int attackStep;    // 発射した火球の段階 (1〜3)
-        private int attackTime;    // タイマー (チャージ・連射間隔・クールダウンを制御)
+        private int attackStep;
+        private int attackTime;
         private int lastSeen;
 
         public BlazeSlimeFireballGoal(BlazeSlimeEntity slime) {
             this.slime = slime;
-            // LOOK のみを指定し SlimeKeepOnJumpingGoal(JUMP, MOVE) と同時に動作させる
             this.setFlags(EnumSet.of(Goal.Flag.LOOK));
         }
 
@@ -146,51 +145,46 @@ public class BlazeSlimeEntity extends Slime {
                 ++this.lastSeen;
             }
 
+            // 1. スライム本体の向きをターゲットへ向ける
+            this.slime.lookAt(target, 10.0F, 10.0F);
+
+            // 2. SlimeMoveControl へターゲットの方向と追尾（攻撃的跳躍）フラグを渡す
+            if (this.slime.getMoveControl() instanceof Slime.SlimeMoveControl slimeMoveControl) {
+                slimeMoveControl.setDirection(this.slime.getYRot(), this.slime.isDealsDamage());
+            }
+
             double distanceSq = this.slime.distanceToSqr(target);
 
-            // ターゲットを注視（移動しつつ向きを合わせる）
-            this.slime.getLookControl().setLookAt(target, 30.0F, 30.0F);
-
-            // 射程範囲内 (16ブロック以内) かつ 視線が通っている場合
             if (distanceSq < 256.0D && this.lastSeen < 40) {
-
-                // タイマーが0になったタイミングで処理を開始
                 if (this.attackTime <= 0) {
                     ++this.attackStep;
 
                     if (this.attackStep == 1) {
-                        // 段階1: チャージ開始 (バニラブレイズ基準: 60 ticks = 3秒間)
                         this.attackTime = 60;
                         this.slime.setCharged(true);
                     } else if (this.attackStep <= 4) {
-                        // 段階2〜4: 火球発射 (6 ticks = 0.3秒間隔で計3発)
                         this.attackTime = 6;
                     } else {
-                        // 段階5: 発射完了、クールダウンへ (バニラブレイズ基準: 100 ticks = 5秒間)
                         this.attackTime = 100;
                         this.attackStep = 0;
                         this.slime.setCharged(false);
                     }
 
-                    // 火球を生成して発射（第2〜4段階でそれぞれ1発ずつ、計3発）
                     if (this.attackStep > 1) {
                         if (!this.slime.level().isClientSide()) {
                             EntityDimensions dimensions = this.slime.getDimensions(this.slime.getPose());
                             double width = dimensions.width();
                             double height = dimensions.height();
 
-                            // 1. 口元（体の前面・高さ中央）の座標を計算
                             Vec3 look = this.slime.getLookAngle();
                             double mouthX = this.slime.getX() + look.x * (width * 0.5D + 0.1D);
-                            double mouthY = this.slime.getY() + height * 0.5D; // 口元の高さ
+                            double mouthY = this.slime.getY() + height * 0.5D;
                             double mouthZ = this.slime.getZ() + look.z * (width * 0.5D + 0.1D);
 
-                            // 2. ターゲットの中心へ向けたベクトルを計算 (バニラブレイズの弾速・精度計算)
                             double dx = target.getX() - mouthX;
                             double dy = target.getY(0.5D) - mouthY;
                             double dz = target.getZ() - mouthZ;
 
-                            // 3. 火球の生成と射出
                             SmallFireball fireball = new SmallFireball(
                                     this.slime.level(),
                                     this.slime,
@@ -204,7 +198,6 @@ public class BlazeSlimeEntity extends Slime {
                     }
                 }
             } else if (this.attackStep > 0) {
-                // ターゲットを見失った場合はチャージを解除
                 this.attackStep = 0;
                 this.slime.setCharged(false);
             }

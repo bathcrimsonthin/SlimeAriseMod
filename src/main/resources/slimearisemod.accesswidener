@@ -1,0 +1,3 @@
+accessWidener v1 named
+accessible class net/minecraft/world/entity/monster/Slime$SlimeMoveControl
+accessible method net/minecraft/world/entity/monster/Slime$SlimeMoveControl setDirection (FZ)V
