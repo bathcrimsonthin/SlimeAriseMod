@@ -47,6 +47,20 @@ public class ModItems {
                     new Item.Properties())
     );
 
+    public static final Item BOMB_SLIME_SPAWN_EGG = registerItem(
+            "bomb_slime_spawn_egg",
+            new SpawnEggItem(ModEntities.BOMB_SLIME,
+                    0x0DA70B, // クリーパーのベース色
+                    0x7ECF7D, // スライムのアクセント色
+                    new Item.Properties())
+    );
+
+    public static final Item DUMMY_BOMB_SLIME_BALL = Registry.register(
+            BuiltInRegistries.ITEM,
+            ResourceLocation.fromNamespaceAndPath(SlimeAriseMod.MOD_ID, "dummy_bomb_slime_ball"),
+            new Item(new Item.Properties())
+    );
+
     // 初期化メソッド(onInitializeから呼ぶ)
     public static void registerModItems() {
         SlimeAriseMod.LOGGER.info("Registering Mod Items for " + SlimeAriseMod.MOD_ID);

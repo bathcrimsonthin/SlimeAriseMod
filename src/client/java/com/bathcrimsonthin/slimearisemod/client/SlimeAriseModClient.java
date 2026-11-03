@@ -4,6 +4,7 @@ import com.bathcrimsonthin.slimearisemod.SlimeAriseMod;
 import com.bathcrimsonthin.slimearisemod.client.model.RabbitSlimeModel;
 import com.bathcrimsonthin.slimearisemod.client.particle.BlazeSlimeParticle;
 import com.bathcrimsonthin.slimearisemod.client.renderer.BlazeSlimeRenderer;
+import com.bathcrimsonthin.slimearisemod.client.renderer.BombSlimeRenderer;
 import com.bathcrimsonthin.slimearisemod.client.renderer.RabbitSlimeRenderer;
 import com.bathcrimsonthin.slimearisemod.entity.ModEntities;
 import com.bathcrimsonthin.slimearisemod.item.ModItems;
@@ -22,6 +23,8 @@ public class SlimeAriseModClient implements ClientModInitializer {
 	public void onInitializeClient() {
 		// モブに描画用レンダラーを紐付ける
 		EntityRendererRegistry.register(ModEntities.BLAZE_SLIME, BlazeSlimeRenderer::new);
+		EntityRendererRegistry.register(ModEntities.RABBIT_SLIME, RabbitSlimeRenderer::new);
+		EntityRendererRegistry.register(ModEntities.BOMB_SLIME, BombSlimeRenderer::new);
 
 		// パーティクルのファクトリ登録
 		ParticleFactoryRegistry.getInstance().register(

@@ -23,6 +23,7 @@ public class ModItemGroups {
                         output.accept(ModItems.BLAZE_SLIME_BALL);
                         output.accept(ModItems.BLAZE_SLIME_SPAWN_EGG);
                         output.accept(ModItems.RABBIT_SLIME_SPAWN_EGG);
+                        output.accept(ModItems.BOMB_SLIME_SPAWN_EGG);
                     })
                     .build()
     );
