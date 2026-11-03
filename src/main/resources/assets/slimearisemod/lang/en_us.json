@@ -1,8 +1,10 @@
 {
   "item.slimearisemod.blaze_slime_ball": "Blaze Slimeball",
   "item.slimearisemod.blaze_slime_spawn_egg": "Blaze Slime Spawn Egg",
+  "item.slimearisemod.rabbit_slime_spawn_egg": "Rabbit Slime Spawn Egg",
 
   "itemGroup.slimearisemod.slime_arise_tab": "Slime Arise",
 
-  "entity.slimearisemod.blaze_slime": "Blaze Slime"
+  "entity.slimearisemod.blaze_slime": "Blaze Slime",
+  "entity.slimearisemod.rabbit_slime": "Rabbit Slime"
 }

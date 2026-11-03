@@ -15,7 +15,7 @@ public class ModEntities {
             BuiltInRegistries.ENTITY_TYPE,
             ResourceLocation.fromNamespaceAndPath(SlimeAriseMod.MOD_ID, "blaze_slime"),
             EntityType.Builder.of(BlazeSlimeEntity::new, MobCategory.MONSTER)
-                    .sized(0.52f, 0.52f)
+                    .sized(0.5202f, 0.5202f)
                     .eyeHeight(0.325f)
                     .spawnDimensionsScale(4.0f)
                     .clientTrackingRange(10)
@@ -23,10 +23,19 @@ public class ModEntities {
                     .build("blaze_slime")
     );
 
+    public static final EntityType<RabbitSlimeEntity> RABBIT_SLIME = Registry.register(
+            BuiltInRegistries.ENTITY_TYPE,
+            ResourceLocation.fromNamespaceAndPath(SlimeAriseMod.MOD_ID, "rabbit_slime"),
+            EntityType.Builder.of(RabbitSlimeEntity::new, MobCategory.MONSTER)
+                    .sized(0.5202F, 0.5202F)
+                    .build("rabbit_slime")
+    );
+
     public static void registerModEntities() {
         SlimeAriseMod.LOGGER.info("Registering Mod Entities for " + SlimeAriseMod.MOD_ID);
 
         // モブの属性を Fabric API に登録
         FabricDefaultAttributeRegistry.register(BLAZE_SLIME, BlazeSlimeEntity.createAttributes());
+        FabricDefaultAttributeRegistry.register(RABBIT_SLIME, RabbitSlimeEntity.createAttributes());
     }
 }

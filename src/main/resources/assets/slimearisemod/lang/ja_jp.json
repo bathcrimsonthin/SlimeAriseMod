@@ -1,8 +1,10 @@
 {
   "item.slimearisemod.blaze_slime_ball": "ブレイズスライムボール",
   "item.slimearisemod.blaze_slime_spawn_egg": "ブレイズスライムのスポーンエッグ",
+  "item.slimearisemod.rabbit_slime_spawn_egg": "バニースライムのスポーンエッグ",
 
   "itemGroup.slimearisemod.slime_arise_tab": "Slime Arise",
 
-  "entity.slimearisemod.blaze_slime": "ブレイズスライム"
+  "entity.slimearisemod.blaze_slime": "ブレイズスライム",
+  "entity.slimearisemod.rabbit_slime": "バニースライム"
 }

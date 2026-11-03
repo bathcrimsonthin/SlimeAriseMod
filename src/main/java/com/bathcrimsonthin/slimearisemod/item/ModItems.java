@@ -39,6 +39,14 @@ public class ModItems {
                     new Item.Properties())
     );
 
+    public static final Item RABBIT_SLIME_SPAWN_EGG = registerItem(
+            "rabbit_slime_spawn_egg",
+            new SpawnEggItem(ModEntities.RABBIT_SLIME,
+                    0xFFFFFF, // 白ウサギの色
+                    0x7ECF7D, // スライムのアクセント色
+                    new Item.Properties())
+    );
+
     // 初期化メソッド(onInitializeから呼ぶ)
     public static void registerModItems() {
         SlimeAriseMod.LOGGER.info("Registering Mod Items for " + SlimeAriseMod.MOD_ID);
