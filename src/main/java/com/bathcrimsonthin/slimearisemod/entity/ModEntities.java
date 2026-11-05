@@ -45,6 +45,17 @@ public class ModEntities {
                     .build("bomb_slime")
     );
 
+    public static final EntityType<WitchSlimeEntity> WITCH_SLIME = Registry.register(
+            BuiltInRegistries.ENTITY_TYPE,
+            ResourceLocation.fromNamespaceAndPath(SlimeAriseMod.MOD_ID, "witch_slime"),
+            EntityType.Builder.of(WitchSlimeEntity::new, MobCategory.MONSTER)
+                    .sized(0.5202F, 0.5202F)
+                    .eyeHeight(0.325F)
+                    .spawnDimensionsScale(4.0F)
+                    .clientTrackingRange(10)
+                    .build("witch_slime")
+    );
+
     public static void registerModEntities() {
         SlimeAriseMod.LOGGER.info("Registering Mod Entities for " + SlimeAriseMod.MOD_ID);
 
@@ -52,5 +63,6 @@ public class ModEntities {
         FabricDefaultAttributeRegistry.register(BLAZE_SLIME, BlazeSlimeEntity.createAttributes());
         FabricDefaultAttributeRegistry.register(RABBIT_SLIME, RabbitSlimeEntity.createAttributes());
         FabricDefaultAttributeRegistry.register(BOMB_SLIME, BombSlimeEntity.createAttributes());
+        FabricDefaultAttributeRegistry.register(WITCH_SLIME, WitchSlimeEntity.createAttributes());
     }
 }

@@ -61,6 +61,23 @@ public class ModItems {
             new Item(new Item.Properties())
     );
 
+    public static final Item WITCH_SLIME_BALL = registerItem(
+            "witch_slime_ball", new WitchSlimeBallItem(new Item.Properties().food(
+                    new FoodProperties.Builder()
+                            .nutrition(0)
+                            .saturationModifier(0)
+                            .alwaysEdible()
+                            .build()
+            )));
+
+    public static final Item WITCH_SLIME_SPAWN_EGG = registerItem(
+            "witch_slime_spawn_egg",
+            new SpawnEggItem(ModEntities.WITCH_SLIME,
+                    0x340000, // ウィッチのベース色
+                    0x7ECF7D, // スライムのアクセント色
+                    new Item.Properties())
+    );
+
     // 初期化メソッド(onInitializeから呼ぶ)
     public static void registerModItems() {
         SlimeAriseMod.LOGGER.info("Registering Mod Items for " + SlimeAriseMod.MOD_ID);

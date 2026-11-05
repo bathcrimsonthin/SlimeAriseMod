@@ -1,14 +1,17 @@
 {
   "item.slimearisemod.blaze_slime_ball": "ブレイズスライムボール",
-  "item.slimearisemod.blaze_slime_spawn_egg": "ブレイズスライムのスポーンエッグ",
-  "item.slimearisemod.rabbit_slime_spawn_egg": "バニースライムのスポーンエッグ",
-  "item.slimearisemod.bomb_slime_spawn_egg": "ボムスライムのスポーンエッグ",
-
   "item.slimearisemod.dummy_bomb_slime_ball": "ボムスライムボール(ダミー)",
+  "item.slimearisemod.witch_slime_ball": "ウィッチスライムボール",
+
+  "item.slimearisemod.blaze_slime_spawn_egg": "ブレイズスライムのスポーンエッグ",
+  "item.slimearisemod.rabbit_slime_spawn_egg": "ラビットスライムのスポーンエッグ",
+  "item.slimearisemod.bomb_slime_spawn_egg": "ボムスライムのスポーンエッグ",
+  "item.slimearisemod.witch_slime_spawn_egg": "ウィッチスライムのスポーンエッグ",
 
   "itemGroup.slimearisemod.slime_arise_tab": "Slime Arise",
 
   "entity.slimearisemod.blaze_slime": "ブレイズスライム",
-  "entity.slimearisemod.rabbit_slime": "バニースライム",
-  "entity.slimearisemod.bomb_slime": "ボムスライム"
+  "entity.slimearisemod.rabbit_slime": "ラビットスライム",
+  "entity.slimearisemod.bomb_slime": "ボムスライム",
+  "entity.slimearisemod.witch_slime": "ウィッチスライム"
 }
