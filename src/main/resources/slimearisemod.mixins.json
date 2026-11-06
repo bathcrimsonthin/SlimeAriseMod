@@ -3,7 +3,8 @@
 	"package": "com.bathcrimsonthin.slimearisemod.mixin",
 	"compatibilityLevel": "JAVA_21",
 	"mixins": [
-		"ExampleMixin"
+		"ExampleMixin",
+		"AreaEffectCloudAccessor"
 	],
 	"injectors": {
 		"defaultRequire": 1

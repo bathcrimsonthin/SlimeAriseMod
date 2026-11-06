@@ -13,12 +13,15 @@ import com.bathcrimsonthin.slimearisemod.item.ModItems;
 import com.bathcrimsonthin.slimearisemod.particle.ModParticles;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.particle.v1.ParticleFactoryRegistry;
+import net.fabricmc.fabric.api.client.rendering.v1.ColorProviderRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.EntityModelLayerRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry;
 import net.minecraft.client.model.geom.ModelLayerLocation;
 import net.minecraft.client.particle.BreakingItemParticle;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.alchemy.PotionContents;
 
 public class SlimeAriseModClient implements ClientModInitializer {
 	@Override
@@ -42,6 +45,17 @@ public class SlimeAriseModClient implements ClientModInitializer {
 		// モデルレイヤーの登録
 		EntityModelLayerRegistry.registerModelLayer(ModModelLayers.WITCH_SLIME_INNER, WitchSlimeModel::createInnerBodyLayer);
 		EntityModelLayerRegistry.registerModelLayer(ModModelLayers.WITCH_SLIME_OUTER, WitchSlimeModel::createOuterBodyLayer);
+
+		// Fabric API を用いたアイテムカラーハンドラーの登録
+		ColorProviderRegistry.ITEM.register((stack, tintIndex) -> {
+			if (tintIndex == 0) {
+				PotionContents contents = stack.get(DataComponents.POTION_CONTENTS);
+				if (contents != null && contents.getColor() != 0) {
+					return 0xFF000000 | contents.getColor();
+				}
+			}
+			return -1;
+		}, ModItems.WITCH_SLIME_BALL);
 	}
 
 	public static class ModModelLayers {
