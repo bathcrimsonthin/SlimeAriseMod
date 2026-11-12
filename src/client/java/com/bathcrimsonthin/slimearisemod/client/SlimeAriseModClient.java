@@ -1,13 +1,11 @@
 package com.bathcrimsonthin.slimearisemod.client;
 
 import com.bathcrimsonthin.slimearisemod.SlimeAriseMod;
+import com.bathcrimsonthin.slimearisemod.client.model.EnderSlimeModel;
 import com.bathcrimsonthin.slimearisemod.client.model.RabbitSlimeModel;
 import com.bathcrimsonthin.slimearisemod.client.model.WitchSlimeModel;
 import com.bathcrimsonthin.slimearisemod.client.particle.BlazeSlimeParticle;
-import com.bathcrimsonthin.slimearisemod.client.renderer.BlazeSlimeRenderer;
-import com.bathcrimsonthin.slimearisemod.client.renderer.BombSlimeRenderer;
-import com.bathcrimsonthin.slimearisemod.client.renderer.RabbitSlimeRenderer;
-import com.bathcrimsonthin.slimearisemod.client.renderer.WitchSlimeRenderer;
+import com.bathcrimsonthin.slimearisemod.client.renderer.*;
 import com.bathcrimsonthin.slimearisemod.entity.ModEntities;
 import com.bathcrimsonthin.slimearisemod.item.ModItems;
 import com.bathcrimsonthin.slimearisemod.particle.ModParticles;
@@ -31,6 +29,7 @@ public class SlimeAriseModClient implements ClientModInitializer {
 		EntityRendererRegistry.register(ModEntities.RABBIT_SLIME, RabbitSlimeRenderer::new);
 		EntityRendererRegistry.register(ModEntities.BOMB_SLIME, BombSlimeRenderer::new);
 		EntityRendererRegistry.register(ModEntities.WITCH_SLIME, WitchSlimeRenderer::new);
+		EntityRendererRegistry.register(ModEntities.ENDER_SLIME, EnderSlimeRenderer::new);
 
 		// パーティクルのファクトリ登録
 		ParticleFactoryRegistry.getInstance().register(
@@ -42,9 +41,9 @@ public class SlimeAriseModClient implements ClientModInitializer {
 		EntityModelLayerRegistry.registerModelLayer(ModModelLayers.RABBIT_SLIME, RabbitSlimeModel::createInnerBodyLayer);
 		EntityModelLayerRegistry.registerModelLayer(ModModelLayers.RABBIT_SLIME_OUTER, RabbitSlimeModel::createOuterBodyLayer);
 		EntityRendererRegistry.register(ModEntities.RABBIT_SLIME, RabbitSlimeRenderer::new);
-		// モデルレイヤーの登録
 		EntityModelLayerRegistry.registerModelLayer(ModModelLayers.WITCH_SLIME_INNER, WitchSlimeModel::createInnerBodyLayer);
 		EntityModelLayerRegistry.registerModelLayer(ModModelLayers.WITCH_SLIME_OUTER, WitchSlimeModel::createOuterBodyLayer);
+		EntityModelLayerRegistry.registerModelLayer(EnderSlimeModel.LAYER_LOCATION, EnderSlimeModel::createBodyLayer);
 
 		// Fabric API を用いたアイテムカラーハンドラーの登録
 		ColorProviderRegistry.ITEM.register((stack, tintIndex) -> {

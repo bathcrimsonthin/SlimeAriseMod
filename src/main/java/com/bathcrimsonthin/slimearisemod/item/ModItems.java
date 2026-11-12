@@ -78,6 +78,12 @@ public class ModItems {
                     new Item.Properties())
     );
 
+    public static final Item DUMMY_ENDER_SLIME_BALL = Registry.register(
+            BuiltInRegistries.ITEM,
+            ResourceLocation.fromNamespaceAndPath(SlimeAriseMod.MOD_ID, "dummy_ender_slime_ball"),
+            new Item(new Item.Properties())
+    );
+
     // 初期化メソッド(onInitializeから呼ぶ)
     public static void registerModItems() {
         SlimeAriseMod.LOGGER.info("Registering Mod Items for " + SlimeAriseMod.MOD_ID);

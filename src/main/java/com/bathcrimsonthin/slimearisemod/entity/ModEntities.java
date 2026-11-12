@@ -56,6 +56,18 @@ public class ModEntities {
                     .build("witch_slime")
     );
 
+    public static final EntityType<EnderSlimeEntity> ENDER_SLIME = Registry.register(
+            BuiltInRegistries.ENTITY_TYPE,
+            ResourceLocation.fromNamespaceAndPath(SlimeAriseMod.MOD_ID, "ender_slime"),
+            EntityType.Builder.of(EnderSlimeEntity::new, MobCategory.MONSTER)
+                    .sized(0.5202F, 1.0404F)       // 横幅 0.5202F, 高さ 1.0404F (縦2倍)
+                    .eyeHeight(0.845F)              // 上部の目の位置に合わせた視線高さ
+                    .spawnDimensionsScale(24.0F)     // Size 4 スポーン時の当たり判定倍率
+                    .clientTrackingRange(10)        // クライアント同期の追跡距離
+                    .build("ender_slime")
+
+    );
+
     public static void registerModEntities() {
         SlimeAriseMod.LOGGER.info("Registering Mod Entities for " + SlimeAriseMod.MOD_ID);
 
@@ -64,5 +76,6 @@ public class ModEntities {
         FabricDefaultAttributeRegistry.register(RABBIT_SLIME, RabbitSlimeEntity.createAttributes());
         FabricDefaultAttributeRegistry.register(BOMB_SLIME, BombSlimeEntity.createAttributes());
         FabricDefaultAttributeRegistry.register(WITCH_SLIME, WitchSlimeEntity.createAttributes());
+        FabricDefaultAttributeRegistry.register(ENDER_SLIME, EnderSlimeEntity.createAttributes());
     }
 }
