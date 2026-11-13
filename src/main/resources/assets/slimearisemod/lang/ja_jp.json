@@ -2,13 +2,15 @@
   "item.slimearisemod.blaze_slime_ball": "ブレイズスライムボール",
   "item.slimearisemod.dummy_bomb_slime_ball": "ボムスライムボール(ダミー)",
   "item.slimearisemod.witch_slime_ball": "ウィッチスライムボール",
-  "item.slimearisemod.dummy_ender_slime_ball": "エンダースライムボール(ダミー)",
+  "item.slimearisemod.ender_slime_ball": "エンダースライムボール(ダミー)",
 
   "item.slimearisemod.blaze_slime_spawn_egg": "ブレイズスライムのスポーンエッグ",
   "item.slimearisemod.rabbit_slime_spawn_egg": "バニースライムのスポーンエッグ",
   "item.slimearisemod.bomb_slime_spawn_egg": "ボムスライムのスポーンエッグ",
   "item.slimearisemod.witch_slime_spawn_egg": "ウィッチスライムのスポーンエッグ",
   "item.slimearisemod.ender_slime_spawn_egg": "エンダースライムのスポーンエッグ",
+
+  "item.slimearisemod.mystery_lingering_potion": "謎の残留ポーション",
 
   "itemGroup.slimearisemod.slime_arise_tab": "Slime Arise",
 

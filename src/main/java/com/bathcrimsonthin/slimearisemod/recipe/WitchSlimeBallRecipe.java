@@ -1,19 +1,44 @@
 package com.bathcrimsonthin.slimearisemod.recipe;
 
 import com.bathcrimsonthin.slimearisemod.item.ModItems;
+import net.minecraft.core.Holder;
 import net.minecraft.core.HolderLookup;
-import net.minecraft.core.NonNullList;
 import net.minecraft.core.component.DataComponents;
+import net.minecraft.network.chat.Component;
+import net.minecraft.util.RandomSource;
+import net.minecraft.world.effect.MobEffect;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.alchemy.PotionContents;
+import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.item.crafting.CraftingBookCategory;
 import net.minecraft.world.item.crafting.CraftingInput;
 import net.minecraft.world.item.crafting.CustomRecipe;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.level.Level;
 
+import java.util.List;
+import java.util.Optional;
+
 public class WitchSlimeBallRecipe extends CustomRecipe {
+
+    public static final String RANDOM_POTION_TAG = "slimearisemod:random_witch_potion";
+
+    private static final List<Holder<MobEffect>> WITCH_EFFECTS = List.of(
+            MobEffects.WATER_BREATHING,
+            MobEffects.FIRE_RESISTANCE,
+            MobEffects.REGENERATION,
+            MobEffects.OOZING,
+            MobEffects.WEAVING,
+            MobEffects.POISON,
+            MobEffects.MOVEMENT_SLOWDOWN,
+            MobEffects.WEAKNESS,
+            MobEffects.JUMP,
+            MobEffects.DAMAGE_BOOST,
+            MobEffects.MOVEMENT_SPEED
+    );
 
     public WitchSlimeBallRecipe(CraftingBookCategory category) {
         super(category);
@@ -21,82 +46,67 @@ public class WitchSlimeBallRecipe extends CustomRecipe {
 
     @Override
     public boolean matches(CraftingInput input, Level level) {
-        // クラフト枠内のアイテム数が正確に2つであることを確認
-        if (input.ingredientCount() != 2) {
+        if (input.ingredientCount() != 4) {
             return false;
         }
 
-        boolean hasBall = false;
-        boolean hasPotion = false;
+        int ballCount = 0;
+        int bottleCount = 0;
 
         for (int i = 0; i < input.size(); i++) {
             ItemStack stack = input.getItem(i);
             if (stack.isEmpty()) continue;
 
-            // 無色の WitchSlimeBall かどうか
             if (stack.is(ModItems.WITCH_SLIME_BALL) && !stack.has(DataComponents.POTION_CONTENTS)) {
-                if (hasBall) return false;
-                hasBall = true;
-            }
-            // ポーション成分（DataComponents.POTION_CONTENTS）を所有しているか
-            else if (stack.has(DataComponents.POTION_CONTENTS)) {
-                if (hasPotion) return false;
-                hasPotion = true;
+                ballCount++;
+            } else if (stack.is(Items.GLASS_BOTTLE)) {
+                bottleCount++;
             } else {
                 return false;
             }
         }
 
-        return hasBall && hasPotion;
+        return ballCount == 3 && bottleCount == 1;
     }
 
     @Override
     public ItemStack assemble(CraftingInput input, HolderLookup.Provider registries) {
-        ItemStack potionStack = ItemStack.EMPTY;
-
-        for (int i = 0; i < input.size(); i++) {
-            ItemStack stack = input.getItem(i);
-            if (stack.has(DataComponents.POTION_CONTENTS)) {
-                potionStack = stack;
-                break;
-            }
-        }
-
-        if (potionStack.isEmpty()) {
-            return ItemStack.EMPTY;
-        }
-
-        // 新しい WitchSlimeBall にポーションデータ（効果およびグラデーションカラー）を移植
-        ItemStack result = new ItemStack(ModItems.WITCH_SLIME_BALL);
-        PotionContents contents = potionStack.get(DataComponents.POTION_CONTENTS);
-        if (contents != null) {
-            result.set(DataComponents.POTION_CONTENTS, contents);
-        }
-
+        // 作業台プレビュー時点では効果を付与せず、識別タグ付きの未確定残留ポーションを返す
+        ItemStack result = new ItemStack(Items.LINGERING_POTION);
+        result.set(DataComponents.ITEM_NAME, Component.translatable("item.slimearisemod.mystery_lingering_potion"));
+        CustomData.update(DataComponents.CUSTOM_DATA, result, tag -> tag.putBoolean(RANDOM_POTION_TAG, true));
         return result;
     }
 
-    // クラフト完了時の残余アイテム処理
-    @Override
-    public NonNullList<ItemStack> getRemainingItems(CraftingInput input) {
-        NonNullList<ItemStack> remainders = NonNullList.withSize(input.size(), ItemStack.EMPTY);
-
-        for (int i = 0; i < input.size(); i++) {
-            ItemStack stack = input.getItem(i);
-
-            // ポーション成分を持つアイテム（ポーション瓶）があるスロットには「空のガラス瓶」を返却
-            if (stack.has(DataComponents.POTION_CONTENTS)) {
-                remainders.set(i, new ItemStack(Items.GLASS_BOTTLE));
-            }
-            // WitchSlimeBall 側のスロットはそのまま消費されるため EMPTY のまま
+    // 実際に作業台から取り出された瞬間にランダムな効果（残留ポーションで60秒 = 4800 ticks）へ確定させる
+    public static void resolveRandomPotion(ItemStack stack, RandomSource random) {
+        if (stack.isEmpty() || !stack.is(Items.LINGERING_POTION)) {
+            return;
         }
 
-        return remainders;
+        CustomData customData = stack.get(DataComponents.CUSTOM_DATA);
+        if (customData == null || !customData.contains(RANDOM_POTION_TAG)) {
+            return;
+        }
+
+        stack.remove(DataComponents.CUSTOM_DATA);
+        stack.remove(DataComponents.ITEM_NAME);
+
+        Holder<MobEffect> selectedEffect = WITCH_EFFECTS.get(random.nextInt(WITCH_EFFECTS.size()));
+        // 残留ポーションは効果時間が1/4になるため、60秒(1200 ticks)にするには4倍の4800 ticksを指定する
+        MobEffectInstance effectInstance = new MobEffectInstance(selectedEffect, 1200, 0);
+
+        PotionContents contents = new PotionContents(
+                Optional.empty(),
+                Optional.of(selectedEffect.value().getColor()),
+                List.of(effectInstance)
+        );
+        stack.set(DataComponents.POTION_CONTENTS, contents);
     }
 
     @Override
     public boolean canCraftInDimensions(int width, int height) {
-        return width * height >= 2;
+        return width * height >= 4;
     }
 
     @Override

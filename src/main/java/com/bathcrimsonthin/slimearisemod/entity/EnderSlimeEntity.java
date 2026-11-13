@@ -247,7 +247,7 @@ public class EnderSlimeEntity extends Slime implements NeutralMob {
     @Override
     protected @NotNull ParticleOptions getParticleType() {
         // ダミーアイテムの見た目を持ったアイテム破砕パーティクルを生成
-        return new ItemParticleOption(ParticleTypes.ITEM, new ItemStack(ModItems.DUMMY_ENDER_SLIME_BALL));
+        return new ItemParticleOption(ParticleTypes.ITEM, new ItemStack(ModItems.ENDER_SLIME_BALL));
     }
 
     @Override

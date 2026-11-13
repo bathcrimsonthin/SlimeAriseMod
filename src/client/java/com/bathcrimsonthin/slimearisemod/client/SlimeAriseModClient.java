@@ -16,6 +16,7 @@ import net.fabricmc.fabric.api.client.rendering.v1.EntityModelLayerRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry;
 import net.minecraft.client.model.geom.ModelLayerLocation;
 import net.minecraft.client.particle.BreakingItemParticle;
+import net.minecraft.client.renderer.entity.ThrownItemRenderer;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
@@ -30,6 +31,7 @@ public class SlimeAriseModClient implements ClientModInitializer {
 		EntityRendererRegistry.register(ModEntities.BOMB_SLIME, BombSlimeRenderer::new);
 		EntityRendererRegistry.register(ModEntities.WITCH_SLIME, WitchSlimeRenderer::new);
 		EntityRendererRegistry.register(ModEntities.ENDER_SLIME, EnderSlimeRenderer::new);
+		EntityRendererRegistry.register(ModEntities.ENDER_SLIME_BALL, ThrownItemRenderer::new);
 
 		// パーティクルのファクトリ登録
 		ParticleFactoryRegistry.getInstance().register(

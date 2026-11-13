@@ -1,9 +1,7 @@
 package com.bathcrimsonthin.slimearisemod.entity;
 
 import com.bathcrimsonthin.slimearisemod.item.ModItems;
-import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
-import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.particles.ColorParticleOption;
 import net.minecraft.core.particles.ItemParticleOption;
 import net.minecraft.core.particles.ParticleOptions;
@@ -11,7 +9,6 @@ import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.world.damagesource.DamageSource;
@@ -29,13 +26,10 @@ import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.monster.Slime;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.alchemy.PotionContents;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.Blocks;
 
 import java.util.EnumSet;
 import java.util.List;
-import java.util.Optional;
 
 public class WitchSlimeEntity extends Slime {
 
@@ -111,32 +105,6 @@ public class WitchSlimeEntity extends Slime {
             for (int i = 0; i < inheritCount && i < children.size(); i++) {
                 children.get(i).applyInternalPotion(parentEffect, false);
             }
-        }
-    }
-
-    // 最小サイズ（isTiny）で死亡した際のみポーション入り WitchSlimeBall をドロップ
-    @Override
-    protected void dropCustomDeathLoot(ServerLevel level, DamageSource damageSource, boolean recentlyHit) {
-        super.dropCustomDeathLoot(level, damageSource, recentlyHit);
-
-        if (!this.isTiny()) {
-            return;
-        }
-
-        Holder<MobEffect> activeEffect = this.currentBrewedEffect != null ? this.currentBrewedEffect : this.storedDebuff;
-
-        if (activeEffect != null) {
-            ItemStack stack = new ItemStack(ModItems.WITCH_SLIME_BALL);
-            MobEffectInstance effectInstance = new MobEffectInstance(activeEffect, 300, 0);
-
-            PotionContents contents = new PotionContents(
-                    Optional.empty(),
-                    Optional.of(activeEffect.value().getColor()),
-                    List.of(effectInstance)
-            );
-
-            stack.set(DataComponents.POTION_CONTENTS, contents);
-            this.spawnAtLocation(stack);
         }
     }
 

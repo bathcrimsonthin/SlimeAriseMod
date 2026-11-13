@@ -68,6 +68,16 @@ public class ModEntities {
 
     );
 
+    public static final EntityType<ThrownEnderSlimeBall> ENDER_SLIME_BALL = Registry.register(
+            BuiltInRegistries.ENTITY_TYPE,
+            ResourceLocation.fromNamespaceAndPath(SlimeAriseMod.MOD_ID, "ender_slime_ball"),
+            EntityType.Builder.<ThrownEnderSlimeBall>of(ThrownEnderSlimeBall::new, MobCategory.MISC)
+                    .sized(0.25F, 0.25F)
+                    .clientTrackingRange(4)
+                    .updateInterval(10)
+                    .build("ender_slime_ball")
+    );
+
     public static void registerModEntities() {
         SlimeAriseMod.LOGGER.info("Registering Mod Entities for " + SlimeAriseMod.MOD_ID);
 

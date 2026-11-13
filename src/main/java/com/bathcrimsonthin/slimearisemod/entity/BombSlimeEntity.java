@@ -37,11 +37,11 @@ public class BombSlimeEntity extends Slime {
         return Monster.createMonsterAttributes();
     }
 
-    @Override
-    protected @NotNull ParticleOptions getParticleType() {
-        // ダミーアイテムの見た目を持ったアイテム破砕パーティクルを生成
-        return new ItemParticleOption(ParticleTypes.ITEM, new ItemStack(ModItems.DUMMY_BOMB_SLIME_BALL));
-    }
+//    @Override
+//    protected @NotNull ParticleOptions getParticleType() {
+//        // ダミーアイテムの見た目を持ったアイテム破砕パーティクルを生成
+//        return new ItemParticleOption(ParticleTypes.ITEM, new ItemStack(ModItems.DUMMY_BOMB_SLIME_BALL));
+//    }
 
     @Override
     protected void defineSynchedData(SynchedEntityData.Builder builder) {

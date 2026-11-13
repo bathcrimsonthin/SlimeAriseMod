@@ -1,6 +1,6 @@
 {
   "parent": "minecraft:item/generated",
   "textures": {
-    "layer0": "slimearisemod:item/dummy_ender_slime_ball"
+    "layer0": "slimearisemod:item/ender_slime_ball"
   }
 }

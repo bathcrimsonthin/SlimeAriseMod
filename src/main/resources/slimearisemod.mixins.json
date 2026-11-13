@@ -4,7 +4,8 @@
 	"compatibilityLevel": "JAVA_21",
 	"mixins": [
 		"ExampleMixin",
-		"AreaEffectCloudAccessor"
+		"AreaEffectCloudAccessor",
+		"ResultSlotMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1

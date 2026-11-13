@@ -55,20 +55,21 @@ public class ModItems {
                     new Item.Properties())
     );
 
-    public static final Item DUMMY_BOMB_SLIME_BALL = Registry.register(
-            BuiltInRegistries.ITEM,
-            ResourceLocation.fromNamespaceAndPath(SlimeAriseMod.MOD_ID, "dummy_bomb_slime_ball"),
-            new Item(new Item.Properties())
-    );
+//    public static final Item DUMMY_BOMB_SLIME_BALL = Registry.register(
+//            BuiltInRegistries.ITEM,
+//            ResourceLocation.fromNamespaceAndPath(SlimeAriseMod.MOD_ID, "dummy_bomb_slime_ball"),
+//            new Item(new Item.Properties())
+//    );
 
     public static final Item WITCH_SLIME_BALL = registerItem(
-            "witch_slime_ball", new WitchSlimeBallItem(new Item.Properties().food(
-                    new FoodProperties.Builder()
-                            .nutrition(0)
-                            .saturationModifier(0)
-                            .alwaysEdible()
-                            .build()
-            )));
+            "witch_slime_ball", new WitchSlimeBallItem(new Item.Properties()
+//                    .food(new FoodProperties.Builder()
+////                            .nutrition(0)
+////                            .saturationModifier(0)
+////                            .alwaysEdible()
+//                            .build()
+//            )
+            ));
 
     public static final Item WITCH_SLIME_SPAWN_EGG = registerItem(
             "witch_slime_spawn_egg",
@@ -78,10 +79,9 @@ public class ModItems {
                     new Item.Properties())
     );
 
-    public static final Item DUMMY_ENDER_SLIME_BALL = Registry.register(
-            BuiltInRegistries.ITEM,
-            ResourceLocation.fromNamespaceAndPath(SlimeAriseMod.MOD_ID, "dummy_ender_slime_ball"),
-            new Item(new Item.Properties())
+    public static final Item ENDER_SLIME_BALL = registerItem(
+            "ender_slime_ball",
+            new EnderSlimeBallItem(new Item.Properties())
     );
 
     public static final Item ENDER_SLIME_SPAWN_EGG = registerItem(
