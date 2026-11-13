@@ -92,6 +92,14 @@ public class ModItems {
                     new Item.Properties())
     );
 
+    public static final Item PUFFERFISH_SLIME_SPAWN_EGG = registerItem(
+            "pufferfish_slime_spawn_egg",
+            new SpawnEggItem(ModEntities.PUFFERFISH_SLIME,
+                    0xF6B201, // フグのベース色
+                    0x7ECF7D, // スライムのアクセント色
+                    new Item.Properties())
+    );
+
     // 初期化メソッド(onInitializeから呼ぶ)
     public static void registerModItems() {
         SlimeAriseMod.LOGGER.info("Registering Mod Items for " + SlimeAriseMod.MOD_ID);

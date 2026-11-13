@@ -9,6 +9,7 @@
   "item.slimearisemod.bomb_slime_spawn_egg": "ボムスライムのスポーンエッグ",
   "item.slimearisemod.witch_slime_spawn_egg": "ウィッチスライムのスポーンエッグ",
   "item.slimearisemod.ender_slime_spawn_egg": "エンダースライムのスポーンエッグ",
+  "item.slimearisemod.pufferfish_slime_spawn_egg": "フグスライムのスポーンエッグ",
 
   "item.slimearisemod.mystery_lingering_potion": "謎の残留ポーション",
 
@@ -18,5 +19,6 @@
   "entity.slimearisemod.rabbit_slime": "バニースライム",
   "entity.slimearisemod.bomb_slime": "ボムスライム",
   "entity.slimearisemod.witch_slime": "ウィッチスライム",
-  "entity.slimearisemod.ender_slime": "エンダースライム"
+  "entity.slimearisemod.ender_slime": "エンダースライム",
+  "entity.slimearisemod.pufferfish_slime": "フグスライム"
 }

@@ -7,30 +7,25 @@ import com.bathcrimsonthin.slimearisemod.client.model.WitchSlimeModel;
 import com.bathcrimsonthin.slimearisemod.client.particle.BlazeSlimeParticle;
 import com.bathcrimsonthin.slimearisemod.client.renderer.*;
 import com.bathcrimsonthin.slimearisemod.entity.ModEntities;
-import com.bathcrimsonthin.slimearisemod.item.ModItems;
 import com.bathcrimsonthin.slimearisemod.particle.ModParticles;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.particle.v1.ParticleFactoryRegistry;
-import net.fabricmc.fabric.api.client.rendering.v1.ColorProviderRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.EntityModelLayerRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry;
 import net.minecraft.client.model.geom.ModelLayerLocation;
-import net.minecraft.client.particle.BreakingItemParticle;
 import net.minecraft.client.renderer.entity.ThrownItemRenderer;
-import net.minecraft.core.component.DataComponents;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.alchemy.PotionContents;
 
 public class SlimeAriseModClient implements ClientModInitializer {
 	@Override
 	public void onInitializeClient() {
-		// モブに描画用レンダラーを紐付ける
+		// モブ・投擲物に描画用レンダラーを紐付ける
 		EntityRendererRegistry.register(ModEntities.BLAZE_SLIME, BlazeSlimeRenderer::new);
 		EntityRendererRegistry.register(ModEntities.RABBIT_SLIME, RabbitSlimeRenderer::new);
 		EntityRendererRegistry.register(ModEntities.BOMB_SLIME, BombSlimeRenderer::new);
 		EntityRendererRegistry.register(ModEntities.WITCH_SLIME, WitchSlimeRenderer::new);
 		EntityRendererRegistry.register(ModEntities.ENDER_SLIME, EnderSlimeRenderer::new);
+		EntityRendererRegistry.register(ModEntities.PUFFERFISH_SLIME, PufferfishSlimeRenderer::new);
 		EntityRendererRegistry.register(ModEntities.ENDER_SLIME_BALL, ThrownItemRenderer::new);
 
 		// パーティクルのファクトリ登録
@@ -42,21 +37,13 @@ public class SlimeAriseModClient implements ClientModInitializer {
 		// モデルのレイヤー登録
 		EntityModelLayerRegistry.registerModelLayer(ModModelLayers.RABBIT_SLIME, RabbitSlimeModel::createInnerBodyLayer);
 		EntityModelLayerRegistry.registerModelLayer(ModModelLayers.RABBIT_SLIME_OUTER, RabbitSlimeModel::createOuterBodyLayer);
-		EntityRendererRegistry.register(ModEntities.RABBIT_SLIME, RabbitSlimeRenderer::new);
 		EntityModelLayerRegistry.registerModelLayer(ModModelLayers.WITCH_SLIME_INNER, WitchSlimeModel::createInnerBodyLayer);
 		EntityModelLayerRegistry.registerModelLayer(ModModelLayers.WITCH_SLIME_OUTER, WitchSlimeModel::createOuterBodyLayer);
 		EntityModelLayerRegistry.registerModelLayer(EnderSlimeModel.LAYER_LOCATION, EnderSlimeModel::createBodyLayer);
-
-		// Fabric API を用いたアイテムカラーハンドラーの登録
-		ColorProviderRegistry.ITEM.register((stack, tintIndex) -> {
-			if (tintIndex == 0) {
-				PotionContents contents = stack.get(DataComponents.POTION_CONTENTS);
-				if (contents != null && contents.getColor() != 0) {
-					return 0xFF000000 | contents.getColor();
-				}
-			}
-			return -1;
-		}, ModItems.WITCH_SLIME_BALL);
+		EntityModelLayerRegistry.registerModelLayer(
+				PufferfishSlimeRenderer.INNER_LAYER,
+				PufferfishSlimeRenderer::createInnerBodyLayer
+		);
 	}
 
 	public static class ModModelLayers {

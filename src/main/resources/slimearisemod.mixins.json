@@ -5,7 +5,9 @@
 	"mixins": [
 		"ExampleMixin",
 		"AreaEffectCloudAccessor",
-		"ResultSlotMixin"
+		"ResultSlotMixin",
+		"PufferfishMixin",
+		"PufferfishMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1

@@ -78,6 +78,17 @@ public class ModEntities {
                     .build("ender_slime_ball")
     );
 
+    public static final EntityType<PufferfishSlimeEntity> PUFFERFISH_SLIME = Registry.register(
+            BuiltInRegistries.ENTITY_TYPE,
+            ResourceLocation.fromNamespaceAndPath(SlimeAriseMod.MOD_ID, "pufferfish_slime"),
+            EntityType.Builder.of(PufferfishSlimeEntity::new, MobCategory.MONSTER)
+                    .sized(0.5202F, 0.5202F)
+                    .eyeHeight(0.325F)
+                    .spawnDimensionsScale(4.0F)
+                    .clientTrackingRange(10)
+                    .build("pufferfish_slime")
+    );
+
     public static void registerModEntities() {
         SlimeAriseMod.LOGGER.info("Registering Mod Entities for " + SlimeAriseMod.MOD_ID);
 
@@ -87,5 +98,6 @@ public class ModEntities {
         FabricDefaultAttributeRegistry.register(BOMB_SLIME, BombSlimeEntity.createAttributes());
         FabricDefaultAttributeRegistry.register(WITCH_SLIME, WitchSlimeEntity.createAttributes());
         FabricDefaultAttributeRegistry.register(ENDER_SLIME, EnderSlimeEntity.createAttributes());
+        FabricDefaultAttributeRegistry.register(PUFFERFISH_SLIME, PufferfishSlimeEntity.createAttributes());
     }
 }
