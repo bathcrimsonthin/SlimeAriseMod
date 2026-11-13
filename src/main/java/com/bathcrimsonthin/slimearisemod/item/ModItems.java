@@ -84,6 +84,14 @@ public class ModItems {
             new Item(new Item.Properties())
     );
 
+    public static final Item ENDER_SLIME_SPAWN_EGG = registerItem(
+            "ender_slime_spawn_egg",
+            new SpawnEggItem(ModEntities.ENDER_SLIME,
+                    0x161616, // エンダーマンのベース色
+                    0x7ECF7D, // スライムのアクセント色
+                    new Item.Properties())
+    );
+
     // 初期化メソッド(onInitializeから呼ぶ)
     public static void registerModItems() {
         SlimeAriseMod.LOGGER.info("Registering Mod Items for " + SlimeAriseMod.MOD_ID);

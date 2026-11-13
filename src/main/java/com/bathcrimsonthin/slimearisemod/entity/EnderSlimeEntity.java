@@ -2,6 +2,8 @@ package com.bathcrimsonthin.slimearisemod.entity;
 
 import com.bathcrimsonthin.slimearisemod.item.ModItems;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.particles.ItemParticleOption;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
@@ -11,10 +13,16 @@ import net.minecraft.nbt.NbtUtils;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.tags.FluidTags;
+import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
+import net.minecraft.util.TimeUtil;
+import net.minecraft.util.valueproviders.UniformInt;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.effect.MobEffects;
@@ -22,10 +30,12 @@ import net.minecraft.world.entity.AreaEffectCloud;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.NeutralMob;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.*;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
+import net.minecraft.world.entity.ai.goal.target.ResetUniversalAngerTargetGoal;
 import net.minecraft.world.entity.ai.goal.target.TargetGoal;
 import net.minecraft.world.entity.ai.targeting.TargetingConditions;
 import net.minecraft.world.entity.monster.Endermite;
@@ -36,18 +46,35 @@ import net.minecraft.world.entity.projectile.DragonFireball;
 import net.minecraft.world.entity.projectile.ThrownPotion;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.alchemy.PotionContents;
+import net.minecraft.world.item.alchemy.Potions;
+import net.minecraft.world.item.enchantment.EnchantmentHelper;
+import net.minecraft.world.item.enchantment.providers.VanillaEnchantmentProviders;
+import net.minecraft.world.level.ClipContext;
+import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.gameevent.GameEvent;
+import net.minecraft.world.level.pathfinder.PathType;
+import net.minecraft.world.level.storage.loot.LootParams;
+import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.EnumSet;
 import java.util.Optional;
+import java.util.UUID;
+import java.util.function.Predicate;
 
-public class EnderSlimeEntity extends Slime {
+public class EnderSlimeEntity extends Slime implements NeutralMob {
+
+    private static final int DELAY_BETWEEN_CREEPY_STARE_SOUND = 400;
+    private static final int MIN_DEAGGRESSION_TIME = 600;
 
     private static final EntityDataAccessor<Optional<BlockState>> DATA_CARRY_STATE =
             SynchedEntityData.defineId(EnderSlimeEntity.class, EntityDataSerializers.OPTIONAL_BLOCK_STATE);
@@ -55,8 +82,20 @@ public class EnderSlimeEntity extends Slime {
     private static final EntityDataAccessor<Boolean> DATA_CREEPY =
             SynchedEntityData.defineId(EnderSlimeEntity.class, EntityDataSerializers.BOOLEAN);
 
+    private static final EntityDataAccessor<Boolean> DATA_STARED_AT =
+            SynchedEntityData.defineId(EnderSlimeEntity.class, EntityDataSerializers.BOOLEAN);
+
+    private static final UniformInt PERSISTENT_ANGER_TIME = TimeUtil.rangeOfSeconds(20, 39);
+
+    private int lastStareSound = Integer.MIN_VALUE;
+    private int targetChangeTime;
+    private int remainingPersistentAngerTime;
+    @Nullable
+    private UUID persistentAngerTarget;
+
     public EnderSlimeEntity(EntityType<? extends Slime> entityType, Level level) {
         super(entityType, level);
+        this.setPathfindingMalus(PathType.WATER, -1.0F);
     }
 
     public static AttributeSupplier.Builder createAttributes() {
@@ -69,6 +108,7 @@ public class EnderSlimeEntity extends Slime {
         super.defineSynchedData(builder);
         builder.define(DATA_CARRY_STATE, Optional.empty());
         builder.define(DATA_CREEPY, false);
+        builder.define(DATA_STARED_AT, false);
     }
 
     @Override
@@ -85,7 +125,7 @@ public class EnderSlimeEntity extends Slime {
 
     @Override
     protected void registerGoals() {
-        this.goalSelector.addGoal(1, new FloatGoal(this));
+        this.goalSelector.addGoal(1, new EnderSlimeFloatGoal(this));
         this.goalSelector.addGoal(2, new EnderSlimeAttackGoal(this));
         this.goalSelector.addGoal(3, new EnderSlimeDragonBreathGoal(this));
         this.goalSelector.addGoal(4, new EnderSlimeRandomDirectionGoal(this));
@@ -93,9 +133,66 @@ public class EnderSlimeEntity extends Slime {
         this.goalSelector.addGoal(10, new EnderSlimePlaceBlockGoal(this));
         this.goalSelector.addGoal(11, new EnderSlimeTakeBlockGoal(this));
 
-        this.targetSelector.addGoal(1, new EnderSlimeLookForPlayerGoal(this));
+        this.targetSelector.addGoal(1, new EnderSlimeLookForPlayerGoal(this, this::isAngryAt));
         this.targetSelector.addGoal(2, new EnderSlimeHurtByTargetGoal(this));
         this.targetSelector.addGoal(3, new NearestAttackableTargetGoal<>(this, Endermite.class, true, false));
+        this.targetSelector.addGoal(4, new ResetUniversalAngerTargetGoal<>(this, false));
+    }
+
+    @Override
+    public void setTarget(@Nullable LivingEntity livingEntity) {
+        super.setTarget(livingEntity);
+        if (livingEntity == null) {
+            this.targetChangeTime = 0;
+            this.entityData.set(DATA_CREEPY, false);
+            this.entityData.set(DATA_STARED_AT, false);
+        } else {
+            this.targetChangeTime = this.tickCount;
+            this.entityData.set(DATA_CREEPY, true);
+        }
+    }
+
+    @Override
+    public void startPersistentAngerTimer() {
+        this.setRemainingPersistentAngerTime(PERSISTENT_ANGER_TIME.sample(this.random));
+    }
+
+    @Override
+    public void setRemainingPersistentAngerTime(int remainingPersistentAngerTime) {
+        this.remainingPersistentAngerTime = remainingPersistentAngerTime;
+    }
+
+    @Override
+    public int getRemainingPersistentAngerTime() {
+        return this.remainingPersistentAngerTime;
+    }
+
+    @Override
+    public void setPersistentAngerTarget(@Nullable UUID persistentAngerTarget) {
+        this.persistentAngerTarget = persistentAngerTarget;
+    }
+
+    @Override
+    @Nullable
+    public UUID getPersistentAngerTarget() {
+        return this.persistentAngerTarget;
+    }
+
+    public void playStareSound() {
+        if (this.tickCount >= this.lastStareSound + DELAY_BETWEEN_CREEPY_STARE_SOUND) {
+            this.lastStareSound = this.tickCount;
+            if (!this.isSilent()) {
+                this.level().playLocalSound(this.getX(), this.getEyeY(), this.getZ(), SoundEvents.ENDERMAN_STARE, this.getSoundSource(), 2.5F, 1.0F, false);
+            }
+        }
+    }
+
+    @Override
+    public void onSyncedDataUpdated(EntityDataAccessor<?> key) {
+        if (DATA_CREEPY.equals(key) && this.hasBeenStaredAt() && this.level().isClientSide) {
+            this.playStareSound();
+        }
+        super.onSyncedDataUpdated(key);
     }
 
     @Override
@@ -115,14 +212,16 @@ public class EnderSlimeEntity extends Slime {
                 );
             }
         } else {
+            this.updatePersistentAnger((ServerLevel) this.level(), true);
+
             // 水・雨でのダメージ ＋ テレポート判定
             if (this.isInWaterOrRain()) {
                 this.hurt(this.damageSources().drown(), 1.0F);
                 this.teleportRandomly();
             }
 
-            // 直射日光回避テレポート
-            if (this.level().isDay()) {
+            // 直射日光回避テレポート（バニラエンダーマン準拠: 敵対後 MIN_DEAGGRESSION_TIME 経過後に発動）
+            if (this.level().isDay() && this.tickCount >= this.targetChangeTime + MIN_DEAGGRESSION_TIME) {
                 float brightness = this.getLightLevelDependentMagicValue();
                 if (brightness > 0.5F && this.level().canSeeSky(this.blockPosition()) && this.random.nextFloat() * 30.0F < (brightness - 0.4F) * 2.0F) {
                     this.setTarget(null);
@@ -130,20 +229,34 @@ public class EnderSlimeEntity extends Slime {
                 }
             }
 
-            // 自身が生成したブレス雲（AreaEffectCloud）の残留時間を 3秒（60 ticks）に短縮・調整
+            // 自身が生成したブレス雲（AreaEffectCloud）の残留時間を短縮・調整
             this.level().getEntitiesOfClass(AreaEffectCloud.class, this.getBoundingBox().inflate(64.0D),
                     cloud -> cloud.getOwner() == this && cloud.getDuration() > 60
             ).forEach(cloud -> {
-                cloud.setDuration(300); // 残留時間を 15秒 に設定
-                cloud.setRadiusPerTick(-cloud.getRadius() / 60.0F); // 時間経過とともに円滑に収縮
+                cloud.setDuration(100); // 残留時間を 10秒 に設定
+//                cloud.setRadiusPerTick(-cloud.getRadius() / 60.0F); // 時間経過とともに円滑に収縮
             });
         }
+    }
+
+    @Override
+    public boolean isSensitiveToWater() {
+        return true;
     }
 
     @Override
     protected @NotNull ParticleOptions getParticleType() {
         // ダミーアイテムの見た目を持ったアイテム破砕パーティクルを生成
         return new ItemParticleOption(ParticleTypes.ITEM, new ItemStack(ModItems.DUMMY_ENDER_SLIME_BALL));
+    }
+
+    @Override
+    public void push(Entity entity) {
+        super.push(entity);
+        // バニラ Slime#push は IronGolem のみ対象のため、敵対対象の Endermite にも接触ダメージを発生させる
+        if (entity instanceof Endermite && this.isDealsDamage()) {
+            this.dealDamage((LivingEntity) entity);
+        }
     }
 
     @Override
@@ -170,13 +283,21 @@ public class EnderSlimeEntity extends Slime {
             }
             return result;
         } else {
+            boolean waterDamage = isPotion && this.hurtWithCleanWater(source, (ThrownPotion) source.getDirectEntity(), amount);
+
             for (int i = 0; i < 64; ++i) {
                 if (this.teleportRandomly()) {
                     return true;
                 }
             }
-            return super.hurt(source, amount);
+            return waterDamage;
         }
+    }
+
+    private boolean hurtWithCleanWater(DamageSource source, ThrownPotion thrownPotion, float amount) {
+        ItemStack itemStack = thrownPotion.getItem();
+        PotionContents potionContents = itemStack.getOrDefault(DataComponents.POTION_CONTENTS, PotionContents.EMPTY);
+        return potionContents.is(Potions.WATER) && super.hurt(source, amount);
     }
 
     public boolean teleportRandomly() {
@@ -200,7 +321,7 @@ public class EnderSlimeEntity extends Slime {
     private boolean teleport(double x, double y, double z) {
         BlockPos.MutableBlockPos mutablePos = new BlockPos.MutableBlockPos(x, y, z);
         while (mutablePos.getY() > this.level().getMinBuildHeight() && !this.level().getBlockState(mutablePos).blocksMotion()) {
-            mutablePos.move(0, -1, 0);
+            mutablePos.move(Direction.DOWN);
         }
 
         BlockState state = this.level().getBlockState(mutablePos);
@@ -209,22 +330,45 @@ public class EnderSlimeEntity extends Slime {
 
         if (blocksMotion && !isWater) {
             Vec3 oldPos = this.position();
-            boolean success = this.randomTeleport(x, mutablePos.getY() + 1.0D, z, true);
+            boolean success = this.randomTeleport(x, y, z, true);
             if (success) {
                 this.level().gameEvent(GameEvent.TELEPORT, oldPos, GameEvent.Context.of(this));
                 if (!this.isSilent()) {
-                    this.level().playSound(null, oldPos.x, oldPos.y, oldPos.z, SoundEvents.ENDERMAN_TELEPORT, this.getSoundSource(), 1.0F, 1.0F);
+                    this.level().playSound(null, this.xo, this.yo, this.zo, SoundEvents.ENDERMAN_TELEPORT, this.getSoundSource(), 1.0F, 1.0F);
                     this.playSound(SoundEvents.ENDERMAN_TELEPORT, 1.0F, 1.0F);
                 }
-                return true;
             }
+            return success;
         }
         return false;
     }
 
+    @Override
+    protected @Nullable SoundEvent getAmbientSound() {
+        return this.isCreepy() ? SoundEvents.ENDERMAN_SCREAM : SoundEvents.ENDERMAN_AMBIENT;
+    }
+
+    @Override
+    protected void dropCustomDeathLoot(ServerLevel serverLevel, DamageSource damageSource, boolean recentlyHit) {
+        super.dropCustomDeathLoot(serverLevel, damageSource, recentlyHit);
+        BlockState carriedState = this.getCarriedBlock();
+        if (carriedState != null) {
+            ItemStack itemStack = new ItemStack(Items.DIAMOND_AXE);
+            EnchantmentHelper.enchantItemFromProvider(itemStack, serverLevel.registryAccess(), VanillaEnchantmentProviders.ENDERMAN_LOOT_DROP, serverLevel.getCurrentDifficultyAt(this.blockPosition()), this.getRandom());
+            LootParams.Builder builder = new LootParams.Builder(serverLevel)
+                    .withParameter(LootContextParams.ORIGIN, this.position())
+                    .withParameter(LootContextParams.TOOL, itemStack)
+                    .withOptionalParameter(LootContextParams.THIS_ENTITY, this);
+
+            for (ItemStack drop : carriedState.getDrops(builder)) {
+                this.spawnAtLocation(drop);
+            }
+        }
+    }
+
     public boolean isLookingAtMe(Player player) {
         ItemStack headStack = player.getInventory().armor.get(3);
-        if (headStack.is(Items.CARVED_PUMPKIN)) {
+        if (headStack.is(Blocks.CARVED_PUMPKIN.asItem())) {
             return false;
         }
 
@@ -253,6 +397,19 @@ public class EnderSlimeEntity extends Slime {
         this.entityData.set(DATA_CREEPY, creepy);
     }
 
+    public boolean hasBeenStaredAt() {
+        return this.entityData.get(DATA_STARED_AT);
+    }
+
+    public void setBeingStaredAt() {
+        this.entityData.set(DATA_STARED_AT, true);
+    }
+
+    @Override
+    public boolean requiresCustomPersistence() {
+        return super.requiresCustomPersistence() || this.getCarriedBlock() != null;
+    }
+
     @Override
     public void addAdditionalSaveData(CompoundTag compound) {
         super.addAdditionalSaveData(compound);
@@ -260,21 +417,54 @@ public class EnderSlimeEntity extends Slime {
         if (carriedState != null) {
             compound.put("carriedBlockState", NbtUtils.writeBlockState(carriedState));
         }
+        this.addPersistentAngerSaveData(compound);
     }
 
     @Override
     public void readAdditionalSaveData(CompoundTag compound) {
         super.readAdditionalSaveData(compound);
+        BlockState state = null;
         if (compound.contains("carriedBlockState", 10)) {
-            BlockState state = NbtUtils.readBlockState(this.level().holderLookup(Registries.BLOCK), compound.getCompound("carriedBlockState"));
+            state = NbtUtils.readBlockState(this.level().holderLookup(Registries.BLOCK), compound.getCompound("carriedBlockState"));
             if (state.isAir()) {
                 state = null;
             }
-            this.setCarriedBlock(state);
         }
+        this.setCarriedBlock(state);
+        this.readPersistentAngerSaveData(this.level(), compound);
     }
 
     // --- Inner AI Goals ---
+
+    static class EnderSlimeFloatGoal extends Goal {
+        private final EnderSlimeEntity slime;
+
+        public EnderSlimeFloatGoal(EnderSlimeEntity slime) {
+            this.slime = slime;
+            this.setFlags(EnumSet.of(Goal.Flag.JUMP, Goal.Flag.MOVE));
+            slime.getNavigation().setCanFloat(true);
+        }
+
+        @Override
+        public boolean canUse() {
+            return (this.slime.isInWater() || this.slime.isInLava()) && this.slime.getMoveControl() instanceof Slime.SlimeMoveControl;
+        }
+
+        @Override
+        public boolean requiresUpdateEveryTick() {
+            return true;
+        }
+
+        @Override
+        public void tick() {
+            if (this.slime.getRandom().nextFloat() < 0.8F) {
+                this.slime.getJumpControl().jump();
+            }
+            if (this.slime.getMoveControl() instanceof Slime.SlimeMoveControl moveControl) {
+                moveControl.setWantedMovement(1.2D);
+            }
+        }
+    }
 
     static class EnderSlimeDragonBreathGoal extends Goal {
         private final EnderSlimeEntity slime;
@@ -314,13 +504,14 @@ public class EnderSlimeEntity extends Slime {
                 return;
             }
 
-            if (--this.attackCooldown <= 0) {
+            if (this.slime.hasLineOfSight(target) && --this.attackCooldown <= 0) {
                 this.attackCooldown = 80 + this.slime.getRandom().nextInt(60);
 
                 Vec3 look = this.slime.getViewVector(1.0F);
                 double spawnOffset = (double) this.slime.getSize() * 0.5D + 0.6D;
                 double spawnX = this.slime.getX() + look.x * spawnOffset;
-                double spawnY = this.slime.getEyeY();
+                // モデル座標の口中心 (Y=13.5F / 16.0F -> 地上から 10.5 / 16.0 = 0.65625) に合わせて射出
+                double spawnY = this.slime.getY() + 0.65625D * (double) this.slime.getSize();
                 double spawnZ = this.slime.getZ() + look.z * spawnOffset;
 
                 double dX = target.getX() - spawnX;
@@ -349,7 +540,7 @@ public class EnderSlimeEntity extends Slime {
         @Override
         public boolean canUse() {
             LivingEntity target = this.slime.getTarget();
-            if (target == null || !target.isAlive()) {
+            if (target == null || !target.isAlive() || !this.slime.canAttack(target)) {
                 return false;
             }
             return this.slime.getMoveControl() instanceof Slime.SlimeMoveControl;
@@ -364,7 +555,7 @@ public class EnderSlimeEntity extends Slime {
         @Override
         public boolean canContinueToUse() {
             LivingEntity target = this.slime.getTarget();
-            if (target == null || !target.isAlive()) {
+            if (target == null || !target.isAlive() || !this.slime.canAttack(target)) {
                 return false;
             }
             return --this.growTiredOfGrowing > 0;
@@ -379,9 +570,9 @@ public class EnderSlimeEntity extends Slime {
         public void tick() {
             LivingEntity target = this.slime.getTarget();
             if (target != null) {
-                this.slime.lookAt(target, 30.0F, 30.0F);
+                this.slime.lookAt(target, 10.0F, 10.0F);
                 if (this.slime.getMoveControl() instanceof Slime.SlimeMoveControl moveControl) {
-                    moveControl.setDirection(this.slime.getYRot(), true);
+                    moveControl.setDirection(this.slime.getYRot(), this.slime.isDealsDamage());
                 }
             }
         }
@@ -405,7 +596,7 @@ public class EnderSlimeEntity extends Slime {
         @Override
         public void tick() {
             if (--this.nextRandomizeTime <= 0) {
-                this.nextRandomizeTime = 40 + this.slime.getRandom().nextInt(60);
+                this.nextRandomizeTime = this.adjustedTickDelay(40 + this.slime.getRandom().nextInt(60));
                 this.chosenDegrees = (float) this.slime.getRandom().nextInt(360);
             }
 
@@ -438,61 +629,78 @@ public class EnderSlimeEntity extends Slime {
 
     static class EnderSlimeLookForPlayerGoal extends NearestAttackableTargetGoal<Player> {
         private final EnderSlimeEntity enderSlime;
+        @Nullable
         private Player pendingTarget;
-        private int stareTimer;
-        private int targetChangeTime;
+        private int aggroTime;
+        private int teleportTime;
+        private final TargetingConditions startAggroTargetConditions;
+        private final TargetingConditions continueAggroTargetConditions = TargetingConditions.forCombat().ignoreLineOfSight();
+        private final Predicate<LivingEntity> isAngerInducing;
 
-        public EnderSlimeLookForPlayerGoal(EnderSlimeEntity enderSlime) {
-            super(enderSlime, Player.class, false);
+        public EnderSlimeLookForPlayerGoal(EnderSlimeEntity enderSlime, @Nullable Predicate<LivingEntity> predicate) {
+            super(enderSlime, Player.class, 10, false, false, predicate);
             this.enderSlime = enderSlime;
+            this.isAngerInducing = livingEntity -> (enderSlime.isLookingAtMe((Player) livingEntity) || enderSlime.isAngryAt(livingEntity)) && !enderSlime.hasIndirectPassenger(livingEntity);
+            this.startAggroTargetConditions = TargetingConditions.forCombat().range(this.getFollowDistance()).selector(this.isAngerInducing);
         }
 
         @Override
         public boolean canUse() {
-            Player player = this.enderSlime.level().getNearestPlayer(this.enderSlime, this.getFollowDistance());
-            if (player != null && this.enderSlime.isLookingAtMe(player)) {
-                this.pendingTarget = player;
-                return true;
-            }
-            return false;
+            this.pendingTarget = this.enderSlime.level().getNearestPlayer(this.startAggroTargetConditions, this.enderSlime);
+            return this.pendingTarget != null;
         }
 
         @Override
         public void start() {
-            this.stareTimer = 5;
-            this.targetChangeTime = 0;
+            this.aggroTime = this.adjustedTickDelay(5);
+            this.teleportTime = 0;
+            this.enderSlime.setBeingStaredAt();
             this.enderSlime.setCreepy(true);
-            this.enderSlime.playSound(SoundEvents.ENDERMAN_STARE, 1.0F, 1.0F);
         }
 
         @Override
         public void stop() {
             this.pendingTarget = null;
-            this.enderSlime.setCreepy(false);
+            if (this.enderSlime.getTarget() == null) {
+                this.enderSlime.setCreepy(false);
+            }
             super.stop();
         }
 
         @Override
         public boolean canContinueToUse() {
             if (this.pendingTarget != null) {
-                if (!this.enderSlime.isLookingAtMe(this.pendingTarget)) {
+                if (!this.isAngerInducing.test(this.pendingTarget)) {
                     return false;
                 } else {
-                    this.enderSlime.lookAt(this.pendingTarget, 30.0F, 30.0F);
+                    this.enderSlime.lookAt(this.pendingTarget, 10.0F, 10.0F);
                     return true;
                 }
+            } else {
+                if (this.target != null) {
+                    if (this.enderSlime.hasIndirectPassenger(this.target)) {
+                        return false;
+                    }
+                    if (this.continueAggroTargetConditions.test(this.enderSlime, this.target)) {
+                        return true;
+                    }
+                }
+                return super.canContinueToUse();
             }
-            return this.target != null && this.target.isAlive() ? true : super.canContinueToUse();
         }
 
         @Override
         public void tick() {
+            if (this.enderSlime.getTarget() == null) {
+                super.setTarget(null);
+            }
+
             if (this.pendingTarget != null) {
-                this.enderSlime.lookAt(this.pendingTarget, 30.0F, 30.0F);
-                if (--this.stareTimer <= 0) {
+                this.enderSlime.lookAt(this.pendingTarget, 10.0F, 10.0F);
+                if (--this.aggroTime <= 0) {
                     this.target = this.pendingTarget;
-                    this.enderSlime.setTarget(this.pendingTarget);
                     this.pendingTarget = null;
+                    super.start();
                 }
             } else {
                 if (this.target != null && !this.enderSlime.isPassenger()) {
@@ -500,9 +708,9 @@ public class EnderSlimeEntity extends Slime {
                         if (this.target.distanceToSqr(this.enderSlime) < 16.0D) {
                             this.enderSlime.teleportRandomly();
                         }
-                        this.targetChangeTime = 0;
-                    } else if (this.target.distanceToSqr(this.enderSlime) > 256.0D && this.targetChangeTime++ >= 30 && this.enderSlime.teleportTowards(this.target)) {
-                        this.targetChangeTime = 0;
+                        this.teleportTime = 0;
+                    } else if (this.target.distanceToSqr(this.enderSlime) > 256.0D && this.teleportTime++ >= this.adjustedTickDelay(30) && this.enderSlime.teleportTowards(this.target)) {
+                        this.teleportTime = 0;
                     }
                 }
                 super.tick();
@@ -544,17 +752,32 @@ public class EnderSlimeEntity extends Slime {
 
         @Override
         public boolean canUse() {
-            return this.slime.getCarriedBlock() == null && this.slime.getRandom().nextInt(200) == 0;
+            if (this.slime.getCarriedBlock() != null) {
+                return false;
+            } else if (!this.slime.level().getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING)) {
+                return false;
+            } else {
+                return this.slime.getRandom().nextInt(reducedTickDelay(20)) == 0;
+            }
         }
 
         @Override
-        public void start() {
-            BlockPos pos = this.slime.blockPosition().below();
-            BlockState state = this.slime.level().getBlockState(pos);
-            if (state.is(BlockTags.ENDERMAN_HOLDABLE)) {
-                this.slime.setCarriedBlock(state);
-                this.slime.level().setBlockAndUpdate(pos, Blocks.AIR.defaultBlockState());
-                this.slime.playSound(SoundEvents.ENDERMAN_SCREAM, 0.5F, 1.5F);
+        public void tick() {
+            RandomSource randomSource = this.slime.getRandom();
+            Level level = this.slime.level();
+            int i = Mth.floor(this.slime.getX() - 2.0D + randomSource.nextDouble() * 4.0D);
+            int j = Mth.floor(this.slime.getY() + randomSource.nextDouble() * 3.0D);
+            int k = Mth.floor(this.slime.getZ() - 2.0D + randomSource.nextDouble() * 4.0D);
+            BlockPos blockPos = new BlockPos(i, j, k);
+            BlockState blockState = level.getBlockState(blockPos);
+            Vec3 vec3 = new Vec3((double) this.slime.getBlockX() + 0.5D, (double) j + 0.5D, (double) this.slime.getBlockZ() + 0.5D);
+            Vec3 vec32 = new Vec3((double) i + 0.5D, (double) j + 0.5D, (double) k + 0.5D);
+            BlockHitResult blockHitResult = level.clip(new ClipContext(vec3, vec32, ClipContext.Block.OUTLINE, ClipContext.Fluid.NONE, this.slime));
+            boolean hitTargetBlock = blockHitResult.getBlockPos().equals(blockPos);
+            if (blockState.is(BlockTags.ENDERMAN_HOLDABLE) && hitTargetBlock) {
+                level.removeBlock(blockPos, false);
+                level.gameEvent(GameEvent.BLOCK_DESTROY, blockPos, GameEvent.Context.of(this.slime, blockState));
+                this.slime.setCarriedBlock(blockState.getBlock().defaultBlockState());
             }
         }
     }
@@ -568,19 +791,44 @@ public class EnderSlimeEntity extends Slime {
 
         @Override
         public boolean canUse() {
-            return this.slime.getCarriedBlock() != null && this.slime.getRandom().nextInt(2000) == 0;
+            if (this.slime.getCarriedBlock() == null) {
+                return false;
+            } else if (!this.slime.level().getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING)) {
+                return false;
+            } else {
+                return this.slime.getRandom().nextInt(reducedTickDelay(2000)) == 0;
+            }
         }
 
         @Override
-        public void start() {
-            BlockPos pos = this.slime.blockPosition();
-            BlockState current = this.slime.level().getBlockState(pos);
-            BlockState below = this.slime.level().getBlockState(pos.below());
-
-            if (current.isAir() && below.blocksMotion()) {
-                this.slime.level().setBlockAndUpdate(pos, this.slime.getCarriedBlock());
-                this.slime.setCarriedBlock(null);
+        public void tick() {
+            RandomSource randomSource = this.slime.getRandom();
+            Level level = this.slime.level();
+            int i = Mth.floor(this.slime.getX() - 1.0D + randomSource.nextDouble() * 2.0D);
+            int j = Mth.floor(this.slime.getY() + randomSource.nextDouble() * 2.0D);
+            int k = Mth.floor(this.slime.getZ() - 1.0D + randomSource.nextDouble() * 2.0D);
+            BlockPos blockPos = new BlockPos(i, j, k);
+            BlockState blockState = level.getBlockState(blockPos);
+            BlockPos blockPosBelow = blockPos.below();
+            BlockState blockStateBelow = level.getBlockState(blockPosBelow);
+            BlockState carriedState = this.slime.getCarriedBlock();
+            if (carriedState != null) {
+                carriedState = Block.updateFromNeighbourShapes(carriedState, this.slime.level(), blockPos);
+                if (this.canPlaceBlock(level, blockPos, carriedState, blockState, blockStateBelow, blockPosBelow)) {
+                    level.setBlock(blockPos, carriedState, 3);
+                    level.gameEvent(GameEvent.BLOCK_PLACE, blockPos, GameEvent.Context.of(this.slime, carriedState));
+                    this.slime.setCarriedBlock(null);
+                }
             }
+        }
+
+        private boolean canPlaceBlock(Level level, BlockPos blockPos, BlockState carriedState, BlockState targetState, BlockState belowState, BlockPos belowPos) {
+            return targetState.isAir()
+                    && !carriedState.isAir()
+                    && !carriedState.is(Blocks.BEDROCK)
+                    && belowState.isCollisionShapeFullBlock(level, belowPos)
+                    && carriedState.canSurvive(level, blockPos)
+                    && level.getEntities(this.slime, AABB.unitCubeFromLowerCorner(Vec3.atLowerCornerOf(blockPos))).isEmpty();
         }
     }
 }

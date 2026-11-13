@@ -79,10 +79,12 @@ public class WitchSlimeEntity extends Slime {
     @Override
     public void setSize(int size, boolean resetHealth) {
         super.setSize(size, resetHealth);
-        double doubleHealth = (double) (size * size * 2);
-        this.getAttribute(Attributes.MAX_HEALTH).setBaseValue(doubleHealth);
+        // (Slimeの体力: size * size) * (Witchの体力: 26.0) / 20.0
+        double maxHealth = (double) (size * size) * 26.0D / 20.0D;
+        this.getAttribute(Attributes.MAX_HEALTH).setBaseValue(maxHealth);
+
         if (resetHealth) {
-            this.setHealth((float) doubleHealth);
+            this.setHealth((float) maxHealth);
         }
     }
 

@@ -26,6 +26,7 @@ public class ModItemGroups {
                         output.accept(ModItems.RABBIT_SLIME_SPAWN_EGG);
                         output.accept(ModItems.BOMB_SLIME_SPAWN_EGG);
                         output.accept(ModItems.WITCH_SLIME_SPAWN_EGG);
+                        output.accept(ModItems.ENDER_SLIME_SPAWN_EGG);
                     })
                     .build()
     );
