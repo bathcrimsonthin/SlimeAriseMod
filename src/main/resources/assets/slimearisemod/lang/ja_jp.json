@@ -10,6 +10,7 @@
   "item.slimearisemod.witch_slime_spawn_egg": "ウィッチスライムのスポーンエッグ",
   "item.slimearisemod.ender_slime_spawn_egg": "エンダースライムのスポーンエッグ",
   "item.slimearisemod.pufferfish_slime_spawn_egg": "フグスライムのスポーンエッグ",
+  "item.slimearisemod.stonecutter_slime_spawn_egg": "石切り台スライムのスポーンエッグ",
 
   "item.slimearisemod.mystery_lingering_potion": "謎の残留ポーション",
 
@@ -20,5 +21,6 @@
   "entity.slimearisemod.bomb_slime": "ボムスライム",
   "entity.slimearisemod.witch_slime": "ウィッチスライム",
   "entity.slimearisemod.ender_slime": "エンダースライム",
-  "entity.slimearisemod.pufferfish_slime": "フグスライム"
+  "entity.slimearisemod.pufferfish_slime": "フグスライム",
+  "entity.slimearisemod.stonecutter_slime": "石切り台スライム"
 }

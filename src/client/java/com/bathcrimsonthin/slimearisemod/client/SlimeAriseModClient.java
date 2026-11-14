@@ -3,6 +3,7 @@ package com.bathcrimsonthin.slimearisemod.client;
 import com.bathcrimsonthin.slimearisemod.SlimeAriseMod;
 import com.bathcrimsonthin.slimearisemod.client.model.EnderSlimeModel;
 import com.bathcrimsonthin.slimearisemod.client.model.RabbitSlimeModel;
+import com.bathcrimsonthin.slimearisemod.client.model.StonecutterSlimeModel;
 import com.bathcrimsonthin.slimearisemod.client.model.WitchSlimeModel;
 import com.bathcrimsonthin.slimearisemod.client.particle.BlazeSlimeParticle;
 import com.bathcrimsonthin.slimearisemod.client.renderer.*;
@@ -27,6 +28,7 @@ public class SlimeAriseModClient implements ClientModInitializer {
 		EntityRendererRegistry.register(ModEntities.ENDER_SLIME, EnderSlimeRenderer::new);
 		EntityRendererRegistry.register(ModEntities.PUFFERFISH_SLIME, PufferfishSlimeRenderer::new);
 		EntityRendererRegistry.register(ModEntities.ENDER_SLIME_BALL, ThrownItemRenderer::new);
+		EntityRendererRegistry.register(ModEntities.STONECUTTER_SLIME, StonecutterSlimeRenderer::new);
 
 		// パーティクルのファクトリ登録
 		ParticleFactoryRegistry.getInstance().register(
@@ -44,6 +46,8 @@ public class SlimeAriseModClient implements ClientModInitializer {
 				PufferfishSlimeRenderer.INNER_LAYER,
 				PufferfishSlimeRenderer::createInnerBodyLayer
 		);
+		EntityModelLayerRegistry.registerModelLayer(StonecutterSlimeModel.INNER_LAYER, StonecutterSlimeModel::createInnerBodyLayer);
+		EntityModelLayerRegistry.registerModelLayer(StonecutterSlimeModel.OUTER_LAYER, StonecutterSlimeModel::createOuterBodyLayer);
 	}
 
 	public static class ModModelLayers {

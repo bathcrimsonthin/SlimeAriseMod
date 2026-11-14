@@ -10,6 +10,7 @@
   "item.slimearisemod.witch_slime_spawn_egg": "Witch Slime Spawn Egg",
   "item.slimearisemod.ender_slime_spawn_egg": "Ender Slime Spawn Egg",
   "item.slimearisemod.pufferfish_slime_spawn_egg": "Pufferfish Slime Spawn Egg",
+  "item.slimearisemod.stonecutter_slime_spawn_egg": "Stonecutter Slime Spawn Egg",
 
   "item.slimearisemod.mystery_lingering_potion": "Mystery Lingering Potion",
 
@@ -20,5 +21,6 @@
   "entity.slimearisemod.bomb_slime": "Bomb Slime",
   "entity.slimearisemod.witch_slime": "Witch Slime",
   "entity.slimearisemod.ender_slime": "Ender Slime",
-  "entity.slimearisemod.pufferfish_slime": "Pufferfish Slime"
+  "entity.slimearisemod.pufferfish_slime": "Pufferfish Slime",
+  "entity.slimearisemod.stonecutter_slime": "Stonecutter Slime"
 }

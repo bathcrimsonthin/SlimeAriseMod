@@ -78,6 +78,17 @@ public class ModEntities {
                     .build("ender_slime_ball")
     );
 
+    public static final EntityType<StonecutterSlimeEntity> STONECUTTER_SLIME = Registry.register(
+            BuiltInRegistries.ENTITY_TYPE,
+            ResourceLocation.fromNamespaceAndPath(SlimeAriseMod.MOD_ID, "stonecutter_slime"),
+            EntityType.Builder.of(StonecutterSlimeEntity::new, MobCategory.MONSTER)
+                    .sized(0.5202F, 0.5202F)
+                    .eyeHeight(0.325F)
+                    .spawnDimensionsScale(4.0F)
+                    .clientTrackingRange(10)
+                    .build("stonecutter_slime")
+    );
+
     public static final EntityType<PufferfishSlimeEntity> PUFFERFISH_SLIME = Registry.register(
             BuiltInRegistries.ENTITY_TYPE,
             ResourceLocation.fromNamespaceAndPath(SlimeAriseMod.MOD_ID, "pufferfish_slime"),
@@ -99,5 +110,6 @@ public class ModEntities {
         FabricDefaultAttributeRegistry.register(WITCH_SLIME, WitchSlimeEntity.createAttributes());
         FabricDefaultAttributeRegistry.register(ENDER_SLIME, EnderSlimeEntity.createAttributes());
         FabricDefaultAttributeRegistry.register(PUFFERFISH_SLIME, PufferfishSlimeEntity.createAttributes());
+        FabricDefaultAttributeRegistry.register(STONECUTTER_SLIME, StonecutterSlimeEntity.createAttributes());
     }
 }

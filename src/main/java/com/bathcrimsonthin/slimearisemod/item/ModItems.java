@@ -100,6 +100,14 @@ public class ModItems {
                     new Item.Properties())
     );
 
+    public static final Item STONECUTTER_SLIME_SPAWN_EGG = registerItem(
+            "stonecutter_slime_spawn_egg",
+            new SpawnEggItem(ModEntities.STONECUTTER_SLIME,
+                    0x7A7979, // 石切り台の石色
+                    0x51A03E, // スライム色
+                    new Item.Properties())
+    );
+
     // 初期化メソッド(onInitializeから呼ぶ)
     public static void registerModItems() {
         SlimeAriseMod.LOGGER.info("Registering Mod Items for " + SlimeAriseMod.MOD_ID);
