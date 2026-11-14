@@ -1,10 +1,7 @@
 package com.bathcrimsonthin.slimearisemod.client;
 
 import com.bathcrimsonthin.slimearisemod.SlimeAriseMod;
-import com.bathcrimsonthin.slimearisemod.client.model.EnderSlimeModel;
-import com.bathcrimsonthin.slimearisemod.client.model.RabbitSlimeModel;
-import com.bathcrimsonthin.slimearisemod.client.model.StonecutterSlimeModel;
-import com.bathcrimsonthin.slimearisemod.client.model.WitchSlimeModel;
+import com.bathcrimsonthin.slimearisemod.client.model.*;
 import com.bathcrimsonthin.slimearisemod.client.particle.BlazeSlimeParticle;
 import com.bathcrimsonthin.slimearisemod.client.renderer.*;
 import com.bathcrimsonthin.slimearisemod.entity.ModEntities;
@@ -29,7 +26,9 @@ public class SlimeAriseModClient implements ClientModInitializer {
 		EntityRendererRegistry.register(ModEntities.PUFFERFISH_SLIME, PufferfishSlimeRenderer::new);
 		EntityRendererRegistry.register(ModEntities.ENDER_SLIME_BALL, ThrownItemRenderer::new);
 		EntityRendererRegistry.register(ModEntities.STONECUTTER_SLIME, StonecutterSlimeRenderer::new);
-
+		EntityRendererRegistry.register(ModEntities.WITHER_SLIME, WitherSlimeRenderer::new);
+		EntityRendererRegistry.register(ModEntities.KING_SLIME, KingSlimeRenderer::new);
+		EntityRendererRegistry.register(ModEntities.SLIME_FIELD, SlimeFieldRenderer::new);
 		// パーティクルのファクトリ登録
 		ParticleFactoryRegistry.getInstance().register(
 				ModParticles.BLAZE_SLIME_PARTICLE,
@@ -48,6 +47,11 @@ public class SlimeAriseModClient implements ClientModInitializer {
 		);
 		EntityModelLayerRegistry.registerModelLayer(StonecutterSlimeModel.INNER_LAYER, StonecutterSlimeModel::createInnerBodyLayer);
 		EntityModelLayerRegistry.registerModelLayer(StonecutterSlimeModel.OUTER_LAYER, StonecutterSlimeModel::createOuterBodyLayer);
+		EntityModelLayerRegistry.registerModelLayer(WitherSlimeModel.INNER_LAYER, WitherSlimeModel::createInnerBodyLayer);
+		EntityModelLayerRegistry.registerModelLayer(WitherSlimeModel.OUTER_LAYER, WitherSlimeModel::createOuterBodyLayer);
+		EntityModelLayerRegistry.registerModelLayer(WitherSlimeModel.ARMOR_LAYER, WitherSlimeModel::createArmorLayer);
+		EntityModelLayerRegistry.registerModelLayer(KingSlimeModel.INNER_LAYER, KingSlimeModel::createInnerBodyLayer);
+		EntityModelLayerRegistry.registerModelLayer(KingSlimeModel.OUTER_LAYER, KingSlimeModel::createOuterBodyLayer);
 	}
 
 	public static class ModModelLayers {

@@ -100,6 +100,39 @@ public class ModEntities {
                     .build("pufferfish_slime")
     );
 
+    public static final EntityType<WitherSlimeEntity> WITHER_SLIME = Registry.register(
+            BuiltInRegistries.ENTITY_TYPE,
+            ResourceLocation.fromNamespaceAndPath(SlimeAriseMod.MOD_ID, "wither_slime"),
+            EntityType.Builder.of(WitherSlimeEntity::new, MobCategory.MONSTER)
+                    .fireImmune()
+                    .sized(0.5202F, 0.5202F)
+                    .eyeHeight(0.325F)
+                    .spawnDimensionsScale(4.0F)
+                    .clientTrackingRange(10)
+                    .build("wither_slime")
+    );
+
+    public static final EntityType<KingSlimeEntity> KING_SLIME = Registry.register(
+            BuiltInRegistries.ENTITY_TYPE,
+            ResourceLocation.fromNamespaceAndPath(SlimeAriseMod.MOD_ID, "king_slime"),
+            EntityType.Builder.of(KingSlimeEntity::new, MobCategory.MONSTER)
+                    .sized(0.5202F, 0.5202F)
+                    .eyeHeight(0.325F)
+                    .spawnDimensionsScale(8.0F)
+                    .clientTrackingRange(12)
+                    .build("king_slime")
+    );
+
+    public static final EntityType<SlimeFieldEntity> SLIME_FIELD = Registry.register(
+            BuiltInRegistries.ENTITY_TYPE,
+            ResourceLocation.fromNamespaceAndPath(SlimeAriseMod.MOD_ID, "slime_field"),
+            EntityType.Builder.of(SlimeFieldEntity::new, MobCategory.MISC)
+                    .sized(6.4F, 0.1F)
+                    .clientTrackingRange(10)
+                    .updateInterval(2)
+                    .build("slime_field")
+    );
+
     public static void registerModEntities() {
         SlimeAriseMod.LOGGER.info("Registering Mod Entities for " + SlimeAriseMod.MOD_ID);
 
@@ -111,5 +144,7 @@ public class ModEntities {
         FabricDefaultAttributeRegistry.register(ENDER_SLIME, EnderSlimeEntity.createAttributes());
         FabricDefaultAttributeRegistry.register(PUFFERFISH_SLIME, PufferfishSlimeEntity.createAttributes());
         FabricDefaultAttributeRegistry.register(STONECUTTER_SLIME, StonecutterSlimeEntity.createAttributes());
+        FabricDefaultAttributeRegistry.register(WITHER_SLIME, WitherSlimeEntity.createAttributes());
+        FabricDefaultAttributeRegistry.register(KING_SLIME, KingSlimeEntity.createAttributes());
     }
 }

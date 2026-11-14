@@ -3,6 +3,9 @@
   "item.slimearisemod.dummy_bomb_slime_ball": "ボムスライムボール(ダミー)",
   "item.slimearisemod.witch_slime_ball": "ウィッチスライムボール",
   "item.slimearisemod.ender_slime_ball": "エンダースライムボール(ダミー)",
+  "item.slimearisemod.wither_slime_ball": "ウィザースライムボール",
+
+  "item.slimearisemod.wither_slime_ball.tooltip": "頭蓋骨を被ると...？",
 
   "item.slimearisemod.blaze_slime_spawn_egg": "ブレイズスライムのスポーンエッグ",
   "item.slimearisemod.rabbit_slime_spawn_egg": "バニースライムのスポーンエッグ",
@@ -11,6 +14,8 @@
   "item.slimearisemod.ender_slime_spawn_egg": "エンダースライムのスポーンエッグ",
   "item.slimearisemod.pufferfish_slime_spawn_egg": "フグスライムのスポーンエッグ",
   "item.slimearisemod.stonecutter_slime_spawn_egg": "石切り台スライムのスポーンエッグ",
+  "item.slimearisemod.wither_slime_spawn_egg": "ウィザースライムのスポーンエッグ",
+  "item.slimearisemod.king_slime_spawn_egg": "キングスライムのスポーンエッグ",
 
   "item.slimearisemod.mystery_lingering_potion": "謎の残留ポーション",
 
@@ -22,5 +27,9 @@
   "entity.slimearisemod.witch_slime": "ウィッチスライム",
   "entity.slimearisemod.ender_slime": "エンダースライム",
   "entity.slimearisemod.pufferfish_slime": "フグスライム",
-  "entity.slimearisemod.stonecutter_slime": "石切り台スライム"
+  "entity.slimearisemod.stonecutter_slime": "石切り台スライム",
+  "entity.slimearisemod.wither_slime": "ウィザースライム",
+  "entity.slimearisemod.king_slime": "キングスライム",
+  "entity.slimearisemod.king_slime.giant_armor": "キングスライム - 巨大アーマー".
+  "entity.slimearisemod.slime_field": "スライムフィールド"
 }

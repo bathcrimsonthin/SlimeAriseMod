@@ -104,7 +104,28 @@ public class ModItems {
             "stonecutter_slime_spawn_egg",
             new SpawnEggItem(ModEntities.STONECUTTER_SLIME,
                     0x7A7979, // 石切り台の石色
-                    0x51A03E, // スライム色
+                    0x7ECF7D, // スライム色
+                    new Item.Properties())
+    );
+
+    public static final Item WITHER_SLIME_SPAWN_EGG = registerItem(
+            "wither_slime_spawn_egg",
+            new SpawnEggItem(ModEntities.WITHER_SLIME,
+                    0x141414, // ウィザーの黒色
+                    0x7ECF7D, // スライムのアクセント色
+                    new Item.Properties())
+    );
+
+    public static final Item WITHER_SLIME_BALL = registerItem(
+            "wither_slime_ball",
+            new WitherSlimeBallItem(new Item.Properties())
+    );
+
+    public static final Item KING_SLIME_SPAWN_EGG = registerItem(
+            "king_slime_spawn_egg",
+            new SpawnEggItem(ModEntities.KING_SLIME,
+                    0x51A03E, // スライムグリーン
+                    0xF5C724, // 王冠のゴールド
                     new Item.Properties())
     );
 

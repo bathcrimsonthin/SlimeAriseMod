@@ -3,6 +3,9 @@
   "item.slimearisemod.dummy_bomb_slime_ball": "Dummy Bomb Slimeball",
   "item.slimearisemod.witch_slime_ball": "Witch Slimeball",
   "item.slimearisemod.ender_slime_ball": "Ender Slimeball",
+  "item.slimearisemod.wither_slime_ball": "Wither Slime Ball",
+
+  "item.slimearisemod.wither_slime_ball.tooltip": "Wearing a skull...?",
 
   "item.slimearisemod.blaze_slime_spawn_egg": "Blaze Slime Spawn Egg",
   "item.slimearisemod.rabbit_slime_spawn_egg": "Rabbit Slime Spawn Egg",
@@ -11,6 +14,8 @@
   "item.slimearisemod.ender_slime_spawn_egg": "Ender Slime Spawn Egg",
   "item.slimearisemod.pufferfish_slime_spawn_egg": "Pufferfish Slime Spawn Egg",
   "item.slimearisemod.stonecutter_slime_spawn_egg": "Stonecutter Slime Spawn Egg",
+  "item.slimearisemod.wither_slime_spawn_egg": "Wither Slime Spawn Egg",
+  "item.slimearisemod.king_slime_spawn_egg": "King Slime Spawn Egg",
 
   "item.slimearisemod.mystery_lingering_potion": "Mystery Lingering Potion",
 
@@ -22,5 +27,9 @@
   "entity.slimearisemod.witch_slime": "Witch Slime",
   "entity.slimearisemod.ender_slime": "Ender Slime",
   "entity.slimearisemod.pufferfish_slime": "Pufferfish Slime",
-  "entity.slimearisemod.stonecutter_slime": "Stonecutter Slime"
+  "entity.slimearisemod.stonecutter_slime": "Stonecutter Slime",
+  "entity.slimearisemod.wither_slime": "Wither Slime",
+  "entity.slimearisemod.king_slime": "King Slime",
+  "entity.slimearisemod.king_slime.giant_armor": "King Slime - Giant Armor",
+  "entity.slimearisemod.slime_field": "Slime Field"
 }
