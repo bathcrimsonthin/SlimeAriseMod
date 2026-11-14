@@ -1,0 +1,33 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "SWS",
+    "EGB",
+    "SXS"
+  ],
+  "key": {
+    "G": {
+      "item": "minecraft:gold_block"
+    },
+    "S": {
+      "item": "minecraft:slime_ball"
+    },
+    "W": {
+      "item": "slimearisemod:witch_slime_ball"
+    },
+    "E": {
+      "item": "slimearisemod:ender_slime_ball"
+    },
+    "B": {
+      "item": "slimearisemod:blaze_slime_ball"
+    },
+    "X": {
+      "item": "slimearisemod:wither_slime_ball"
+    }
+  },
+  "result": {
+    "id": "slimearisemod:slimy_crown",
+    "count": 1
+  }
+}

@@ -9,6 +9,7 @@ import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.Item;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.SpawnEggItem;
 
 public class ModItems {
@@ -127,6 +128,11 @@ public class ModItems {
                     0x51A03E, // スライムグリーン
                     0xF5C724, // 王冠のゴールド
                     new Item.Properties())
+    );
+
+    public static final Item SLIMY_CROWN = registerItem(
+            "slimy_crown",
+            new SlimyCrownItem(new Item.Properties().stacksTo(1).rarity(Rarity.RARE))
     );
 
     // 初期化メソッド(onInitializeから呼ぶ)

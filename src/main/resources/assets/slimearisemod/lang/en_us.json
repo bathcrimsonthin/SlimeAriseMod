@@ -5,6 +5,13 @@
   "item.slimearisemod.ender_slime_ball": "Ender Slimeball",
   "item.slimearisemod.wither_slime_ball": "Wither Slime Ball",
 
+  "item.slimearisemod.slimy_crown": "Slimy Crown",
+  "item.slimearisemod.slimy_crown.tooltip": "Hold it aloft under the open sky of a swamp on a full moon night...",
+  "item.slimearisemod.slimy_crown.fail.biome": "It only reacts within a swamp...",
+  "item.slimearisemod.slimy_crown.fail.sky": "You must be under an open sky...",
+  "item.slimearisemod.slimy_crown.fail.night": "It only reacts at night...",
+  "item.slimearisemod.slimy_crown.fail.full_moon": "It requires the light of a full moon...",
+
   "item.slimearisemod.wither_slime_ball.tooltip": "Wearing a skull...?",
 
   "item.slimearisemod.blaze_slime_spawn_egg": "Blaze Slime Spawn Egg",

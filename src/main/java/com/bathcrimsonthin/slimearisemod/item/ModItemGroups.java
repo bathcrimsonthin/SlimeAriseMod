@@ -17,9 +17,10 @@ public class ModItemGroups {
                     // タブの表示名 (langファイルで多言語化)
                     .title(Component.translatable("itemGroup.slimearisemod.slime_arise_tab"))
                     // タブのアイコン画像アイテム
-                    .icon(() -> new ItemStack(ModItems.BLAZE_SLIME_BALL))
+                    .icon(() -> new ItemStack(ModItems.SLIMY_CROWN))
                     // タブ内に表示するアイテムリスト
                     .displayItems((displayParameters, output) -> {
+                        output.accept(ModItems.SLIMY_CROWN);
                         output.accept(ModItems.BLAZE_SLIME_BALL);
                         output.accept(ModItems.WITCH_SLIME_BALL);
                         output.accept(ModItems.ENDER_SLIME_BALL);

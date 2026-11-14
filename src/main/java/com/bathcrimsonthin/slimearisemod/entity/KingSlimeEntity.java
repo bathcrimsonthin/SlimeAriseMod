@@ -34,6 +34,7 @@ import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.monster.Slime;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.phys.AABB;
@@ -97,6 +98,7 @@ public class KingSlimeEntity extends Slime {
     private int absorbTimer = 0;
     private final List<UUID> absorbingSlimeIds = new ArrayList<>();
     private boolean wasOnGroundLastTick = true;
+    private boolean wasProjectileImmuneLastTick = false;
 
     public KingSlimeEntity(EntityType<? extends Slime> entityType, Level level) {
         super(entityType, level);
@@ -125,11 +127,13 @@ public class KingSlimeEntity extends Slime {
             maxHealthAttr.setBaseValue(MAX_MAIN_HP);
         }
 
+        // バニラのSize=2スライムと同等の移動速度(0.4)
         AttributeInstance moveSpeedAttr = this.getAttribute(Attributes.MOVEMENT_SPEED);
         if (moveSpeedAttr != null) {
             moveSpeedAttr.setBaseValue(0.2D + 0.1D * NORMAL_SIZE);
         }
 
+        // バニラのSize=2スライムと同等の攻撃力(2.0)
         AttributeInstance attackDamageAttr = this.getAttribute(Attributes.ATTACK_DAMAGE);
         if (attackDamageAttr != null) {
             attackDamageAttr.setBaseValue(size >= GIANT_SIZE ? 4.0D : 2.0D);
@@ -154,6 +158,15 @@ public class KingSlimeEntity extends Slime {
 
     public boolean isAbsorbing() {
         return this.getKingState() == STATE_ABSORBING;
+    }
+
+    public boolean isBelowHalfHealth() {
+        return this.getHealth() < this.getMaxHealth() * 0.5F;
+    }
+
+    // 通常形態かつ体力半分未満のときのみ飛翔体耐性が有効
+    public boolean isProjectileImmune() {
+        return this.getKingState() == STATE_NORMAL && this.isBelowHalfHealth();
     }
 
     @Nullable
@@ -194,6 +207,35 @@ public class KingSlimeEntity extends Slime {
                 this.preventSubordinateFriendlyFire(serverLevel);
             }
 
+            // 飛翔体耐性の視覚・聴覚フィードバック＆ボスバー色切り替え
+            boolean projectileImmune = this.isProjectileImmune();
+            if (projectileImmune && !this.wasProjectileImmuneLastTick) {
+                this.playSound(SoundEvents.SHIELD_BLOCK, 1.2F, 1.3F);
+                serverLevel.sendParticles(
+                        ParticleTypes.ENCHANTED_HIT,
+                        this.getX(),
+                        this.getY(0.5D),
+                        this.getZ(),
+                        24,
+                        0.6D,
+                        0.5D,
+                        0.6D,
+                        0.15D
+                );
+            }
+            this.wasProjectileImmuneLastTick = projectileImmune;
+
+            if (projectileImmune) {
+                this.spawnProjectileShieldParticles(serverLevel);
+            }
+
+            BossEvent.BossBarColor desiredColor = projectileImmune
+                    ? BossEvent.BossBarColor.BLUE
+                    : BossEvent.BossBarColor.GREEN;
+            if (this.mainBossEvent.getColor() != desiredColor) {
+                this.mainBossEvent.setColor(desiredColor);
+            }
+
             this.mainBossEvent.setProgress(this.getHealth() / this.getMaxHealth());
             this.giantBossEvent.setVisible(state == STATE_GIANT);
             if (state == STATE_GIANT) {
@@ -202,6 +244,22 @@ public class KingSlimeEntity extends Slime {
         }
 
         this.wasOnGroundLastTick = this.onGround();
+    }
+
+    // 飛翔体耐性があることを示す回転バリアオーラ
+    private void spawnProjectileShieldParticles(ServerLevel serverLevel) {
+        if (this.tickCount % 2 != 0) {
+            return;
+        }
+        double radius = this.getBbWidth() * 0.75D;
+        double baseAngle = this.tickCount * 0.25D;
+        for (int i = 0; i < 2; i++) {
+            double angle = baseAngle + Math.PI * i;
+            double px = this.getX() + Math.cos(angle) * radius;
+            double py = this.getY() + 0.25D + ((this.tickCount + i * 5) % 10) * 0.08D;
+            double pz = this.getZ() + Math.sin(angle) * radius;
+            serverLevel.sendParticles(ParticleTypes.ENCHANTED_HIT, px, py, pz, 1, 0.0D, 0.0D, 0.0D, 0.0D);
+        }
     }
 
     private void preventSubordinateFriendlyFire(ServerLevel serverLevel) {
@@ -479,7 +537,7 @@ public class KingSlimeEntity extends Slime {
         return startY;
     }
 
-    // 吸収シーケンス中の完全無敵 ＆ 壁埋まりによる窒息ダメージ無効化
+    // 吸収シーケンス中の完全無敵 ＆ 壁埋まりによる窒息ダメージ無効化 ＆ 通常形態HP半分未満での飛翔体無効化
     @Override
     public boolean isInvulnerableTo(DamageSource source) {
         if (source.is(DamageTypes.IN_WALL)) {
@@ -488,11 +546,54 @@ public class KingSlimeEntity extends Slime {
         if (this.isAbsorbing() && !source.is(DamageTypeTags.BYPASSES_INVULNERABILITY)) {
             return true;
         }
+        if (this.isProjectileImmune()
+                && (source.is(DamageTypeTags.IS_PROJECTILE) || source.getDirectEntity() instanceof Projectile)) {
+            return true;
+        }
         return super.isInvulnerableTo(source);
     }
 
     @Override
     public boolean hurt(DamageSource source, float amount) {
+        // 通常形態でHP半分以下の場合、飛翔体を弾き返して分かりやすくフィードバックする
+        if (this.isProjectileImmune()
+                && (source.is(DamageTypeTags.IS_PROJECTILE) || source.getDirectEntity() instanceof Projectile)) {
+            Entity direct = source.getDirectEntity();
+            if (direct != null) {
+                Vec3 deflected = direct.getDeltaMovement().scale(-0.45D).add(0.0D, 0.25D, 0.0D);
+                direct.setDeltaMovement(deflected);
+                direct.hurtMarked = true;
+
+                if (this.level() instanceof ServerLevel serverLevel) {
+                    serverLevel.sendParticles(
+                            ParticleTypes.CRIT,
+                            direct.getX(),
+                            direct.getY(),
+                            direct.getZ(),
+                            10,
+                            0.2D,
+                            0.2D,
+                            0.2D,
+                            0.12D
+                    );
+                    serverLevel.sendParticles(
+                            ParticleTypes.ITEM_SLIME,
+                            direct.getX(),
+                            direct.getY(),
+                            direct.getZ(),
+                            6,
+                            0.15D,
+                            0.15D,
+                            0.15D,
+                            0.06D
+                    );
+                }
+            }
+            this.playSound(SoundEvents.SHIELD_BLOCK, 1.1F, 1.25F);
+            this.playSound(SoundEvents.SLIME_JUMP, 0.9F, 1.4F);
+            return false;
+        }
+
         if (this.isInvulnerableTo(source)) {
             return false;
         }
@@ -599,11 +700,15 @@ public class KingSlimeEntity extends Slime {
         return slime;
     }
 
+    // 通常形態ではバニラのスライムと同じジャンプ力、巨大形態時のみ高跳躍
     @Override
     public void jumpFromGround() {
+        if (!this.isGiant()) {
+            super.jumpFromGround();
+            return;
+        }
         Vec3 motion = this.getDeltaMovement();
-        float jumpMultiplier = this.isGiant() ? 1.85F : 1.45F;
-        this.setDeltaMovement(motion.x, (double) (this.getJumpPower() * jumpMultiplier), motion.z);
+        this.setDeltaMovement(motion.x, (double) (this.getJumpPower() * 1.85F), motion.z);
         this.hasImpulse = true;
     }
 

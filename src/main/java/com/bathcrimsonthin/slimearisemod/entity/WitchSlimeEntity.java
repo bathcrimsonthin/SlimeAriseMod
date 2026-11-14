@@ -323,8 +323,9 @@ public class WitchSlimeEntity extends Slime {
             if (this.slime.getHealth() < this.slime.getMaxHealth() * 0.5F) {
                 List<Holder<MobEffect>> outOfCombatBuffs = List.of(
                         MobEffects.REGENERATION,
-                        MobEffects.OOZING,
-                        MobEffects.WEAVING
+                        MobEffects.OOZING
+//                        ,
+//                        MobEffects.WEAVING
                 );
                 return outOfCombatBuffs.get(this.slime.getRandom().nextInt(outOfCombatBuffs.size()));
             }
