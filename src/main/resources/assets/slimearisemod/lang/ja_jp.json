@@ -21,6 +21,8 @@
 
   "item.slimearisemod.slime_gummy": "スライムグミ",
   "item.slimearisemod.slime_gummy.tooltip": "素早く食べられ、わずかに跳躍力が上がる",
+  "item.slimearisemod.slime_pudding": "スライムプリン",
+  "item.slimearisemod.slime_pudding.tooltip": "食べると有害な効果をランダムに1つ解除する",
 
   "item.slimearisemod.blaze_slime_spawn_egg": "ブレイズスライムのスポーンエッグ",
   "item.slimearisemod.rabbit_slime_spawn_egg": "バニースライムのスポーンエッグ",
