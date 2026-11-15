@@ -133,6 +133,16 @@ public class ModEntities {
                     .build("slime_field")
     );
 
+    public static final EntityType<SlimeArrowEntity> SLIME_ARROW = Registry.register(
+            BuiltInRegistries.ENTITY_TYPE,
+            ResourceLocation.fromNamespaceAndPath(SlimeAriseMod.MOD_ID, "slime_arrow"),
+            EntityType.Builder.<SlimeArrowEntity>of(SlimeArrowEntity::new, MobCategory.MISC)
+                    .sized(0.5F, 0.5F)
+                    .clientTrackingRange(4)
+                    .updateInterval(20)
+                    .build("slime_arrow")
+    );
+
     public static void registerModEntities() {
         SlimeAriseMod.LOGGER.info("Registering Mod Entities for " + SlimeAriseMod.MOD_ID);
 

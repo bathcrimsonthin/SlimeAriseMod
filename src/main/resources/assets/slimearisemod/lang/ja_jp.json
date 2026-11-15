@@ -24,6 +24,10 @@
   "item.slimearisemod.slime_pudding": "スライムプリン",
   "item.slimearisemod.slime_pudding.tooltip": "食べると有害な効果をランダムに1つ解除する",
 
+  "item.slimearisemod.slime_arrow": "スライムの矢",
+  "item.slimearisemod.slime_arrow.tooltip": "ブロックで最大2回跳弾し、命中した敵に鈍足を与える",
+  "entity.slimearisemod.slime_arrow": "スライムの矢",
+
   "item.slimearisemod.blaze_slime_spawn_egg": "ブレイズスライムのスポーンエッグ",
   "item.slimearisemod.rabbit_slime_spawn_egg": "バニースライムのスポーンエッグ",
   "item.slimearisemod.bomb_slime_spawn_egg": "ボムスライムのスポーンエッグ",

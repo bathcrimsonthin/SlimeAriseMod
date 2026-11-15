@@ -8,6 +8,7 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.item.*;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.block.DispenserBlock;
 
 public class ModItems {
     // アイテム登録用ヘルパーメソッド
@@ -155,9 +156,16 @@ public class ModItems {
             )
     );
 
+    public static final Item SLIME_ARROW = registerItem(
+            "slime_arrow",
+            new SlimeArrowItem(new Item.Properties())
+    );
+
     // 初期化メソッド(onInitializeから呼ぶ)
     public static void registerModItems() {
         SlimeAriseMod.LOGGER.info("Registering Mod Items for " + SlimeAriseMod.MOD_ID);
+
+        DispenserBlock.registerProjectileBehavior(ModItems.SLIME_ARROW);
 
 //        // クリエイティブタブへの追加(後で専用タブに変更)
 //        ItemGroupEvents.modifyEntriesEvent(CreativeModeTabs.INGREDIENTS).register(entries -> {
