@@ -1,0 +1,25 @@
+{
+  "variants": {
+    "facing=up": {
+      "model": "slimearisemod:block/sticky_torch"
+    },
+    "facing=down": {
+      "model": "slimearisemod:block/sticky_torch_ceiling"
+    },
+    "facing=east": {
+      "model": "slimearisemod:block/sticky_torch_wall"
+    },
+    "facing=south": {
+      "model": "slimearisemod:block/sticky_torch_wall",
+      "y": 90
+    },
+    "facing=west": {
+      "model": "slimearisemod:block/sticky_torch_wall",
+      "y": 180
+    },
+    "facing=north": {
+      "model": "slimearisemod:block/sticky_torch_wall",
+      "y": 270
+    }
+  }
+}

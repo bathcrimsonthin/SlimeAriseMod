@@ -1,16 +1,19 @@
 package com.bathcrimsonthin.slimearisemod.client;
 
 import com.bathcrimsonthin.slimearisemod.SlimeAriseMod;
+import com.bathcrimsonthin.slimearisemod.block.ModBlocks;
 import com.bathcrimsonthin.slimearisemod.client.model.*;
 import com.bathcrimsonthin.slimearisemod.client.particle.BlazeSlimeParticle;
 import com.bathcrimsonthin.slimearisemod.client.renderer.*;
 import com.bathcrimsonthin.slimearisemod.entity.ModEntities;
 import com.bathcrimsonthin.slimearisemod.particle.ModParticles;
 import net.fabricmc.api.ClientModInitializer;
+import net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap;
 import net.fabricmc.fabric.api.client.particle.v1.ParticleFactoryRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.EntityModelLayerRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry;
 import net.minecraft.client.model.geom.ModelLayerLocation;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.EntityRenderers;
 import net.minecraft.client.renderer.entity.ThrownItemRenderer;
 import net.minecraft.resources.ResourceLocation;
@@ -31,6 +34,7 @@ public class SlimeAriseModClient implements ClientModInitializer {
 		EntityRendererRegistry.register(ModEntities.KING_SLIME, KingSlimeRenderer::new);
 		EntityRendererRegistry.register(ModEntities.SLIME_FIELD, SlimeFieldRenderer::new);
 		EntityRendererRegistry.register(ModEntities.SLIME_ARROW, SlimeArrowRenderer::new);
+		EntityRendererRegistry.register(ModEntities.STICKY_TORCH_PROJECTILE, ThrownItemRenderer::new);
 		// パーティクルのファクトリ登録
 		ParticleFactoryRegistry.getInstance().register(
 				ModParticles.BLAZE_SLIME_PARTICLE,
@@ -54,6 +58,8 @@ public class SlimeAriseModClient implements ClientModInitializer {
 		EntityModelLayerRegistry.registerModelLayer(WitherSlimeModel.ARMOR_LAYER, WitherSlimeModel::createArmorLayer);
 		EntityModelLayerRegistry.registerModelLayer(KingSlimeModel.INNER_LAYER, KingSlimeModel::createInnerBodyLayer);
 		EntityModelLayerRegistry.registerModelLayer(KingSlimeModel.OUTER_LAYER, KingSlimeModel::createOuterBodyLayer);
+		// 粘着たいまつの炎・透過部分を正しく描画する
+		BlockRenderLayerMap.INSTANCE.putBlock(ModBlocks.STICKY_TORCH, RenderType.cutout());
 	}
 
 	public static class ModModelLayers {

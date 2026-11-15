@@ -1,6 +1,7 @@
 package com.bathcrimsonthin.slimearisemod.item;
 
 import com.bathcrimsonthin.slimearisemod.SlimeAriseMod;
+import com.bathcrimsonthin.slimearisemod.block.ModBlocks;
 import com.bathcrimsonthin.slimearisemod.entity.ModEntities;
 import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
 import net.minecraft.core.Registry;
@@ -161,11 +162,17 @@ public class ModItems {
             new SlimeArrowItem(new Item.Properties())
     );
 
+    public static final Item STICKY_TORCH = registerItem(
+            "sticky_torch",
+            new StickyTorchItem(ModBlocks.STICKY_TORCH, new Item.Properties())
+    );
+
     // 初期化メソッド(onInitializeから呼ぶ)
     public static void registerModItems() {
         SlimeAriseMod.LOGGER.info("Registering Mod Items for " + SlimeAriseMod.MOD_ID);
 
         DispenserBlock.registerProjectileBehavior(ModItems.SLIME_ARROW);
+        DispenserBlock.registerProjectileBehavior(ModItems.STICKY_TORCH);
 
 //        // クリエイティブタブへの追加(後で専用タブに変更)
 //        ItemGroupEvents.modifyEntriesEvent(CreativeModeTabs.INGREDIENTS).register(entries -> {

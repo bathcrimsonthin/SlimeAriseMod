@@ -1,0 +1,25 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    {
+      "item": "minecraft:torch"
+    },
+    {
+      "item": "minecraft:torch"
+    },
+    {
+      "item": "minecraft:torch"
+    },
+    {
+      "item": "minecraft:torch"
+    },
+    {
+      "item": "minecraft:slime_ball"
+    }
+  ],
+  "result": {
+    "id": "slimearisemod:sticky_torch",
+    "count": 4
+  }
+}
