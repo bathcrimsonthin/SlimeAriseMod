@@ -34,6 +34,13 @@
   "item.slimearisemod.sticky_torch.tooltip2": "直接右クリックで天井にも設置可能",
   "entity.slimearisemod.sticky_torch_projectile": "粘着たいまつ",
 
+  "item.slimearisemod.slime_bottle": "スライム入り瓶",
+  "block.slimearisemod.slime_cushion": "スライムクッション",
+  "item.slimearisemod.slime_bottle.tooltip.1": "右クリックで投げ、着弾地点に3x3のスライムクッションを展開",
+  "item.slimearisemod.slime_bottle.tooltip.2": "着地時に大きく跳ねて落下ダメージを無効化（スニークで停止）",
+  "advancements.slimearisemod.craft_slime_bottle.title": "緊急エアバッグ",
+  "advancements.slimearisemod.craft_slime_bottle.description": "スライム入り瓶を作成する",
+
   "item.slimearisemod.blaze_slime_spawn_egg": "ブレイズスライムのスポーンエッグ",
   "item.slimearisemod.rabbit_slime_spawn_egg": "バニースライムのスポーンエッグ",
   "item.slimearisemod.bomb_slime_spawn_egg": "ボムスライムのスポーンエッグ",

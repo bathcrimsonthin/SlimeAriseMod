@@ -35,6 +35,7 @@ public class SlimeAriseModClient implements ClientModInitializer {
 		EntityRendererRegistry.register(ModEntities.SLIME_FIELD, SlimeFieldRenderer::new);
 		EntityRendererRegistry.register(ModEntities.SLIME_ARROW, SlimeArrowRenderer::new);
 		EntityRendererRegistry.register(ModEntities.STICKY_TORCH_PROJECTILE, ThrownItemRenderer::new);
+		EntityRendererRegistry.register(ModEntities.SLIME_BOTTLE_PROJECTILE, ThrownItemRenderer::new);
 		// パーティクルのファクトリ登録
 		ParticleFactoryRegistry.getInstance().register(
 				ModParticles.BLAZE_SLIME_PARTICLE,
@@ -60,6 +61,7 @@ public class SlimeAriseModClient implements ClientModInitializer {
 		EntityModelLayerRegistry.registerModelLayer(KingSlimeModel.OUTER_LAYER, KingSlimeModel::createOuterBodyLayer);
 		// 粘着たいまつの炎・透過部分を正しく描画する
 		BlockRenderLayerMap.INSTANCE.putBlock(ModBlocks.STICKY_TORCH, RenderType.cutout());
+		BlockRenderLayerMap.INSTANCE.putBlock(ModBlocks.SLIME_CUSHION, RenderType.translucent());
 	}
 
 	public static class ModModelLayers {

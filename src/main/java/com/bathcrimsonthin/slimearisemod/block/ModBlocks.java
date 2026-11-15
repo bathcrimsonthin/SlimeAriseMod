@@ -23,6 +23,17 @@ public final class ModBlocks {
             )
     );
 
+    public static final Block SLIME_CUSHION = registerBlock(
+            "slime_cushion",
+            new SlimeCushionBlock(
+                    BlockBehaviour.Properties.of()
+                            .instabreak()
+                            .noOcclusion()
+                            .sound(SoundType.SLIME_BLOCK)
+                            .pushReaction(PushReaction.DESTROY)
+            )
+    );
+
     private ModBlocks() {
     }
 

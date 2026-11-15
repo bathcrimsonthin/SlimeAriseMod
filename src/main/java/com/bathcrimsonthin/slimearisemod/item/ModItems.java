@@ -167,12 +167,18 @@ public class ModItems {
             new StickyTorchItem(ModBlocks.STICKY_TORCH, new Item.Properties())
     );
 
+    public static final Item SLIME_BOTTLE = registerItem(
+            "slime_bottle",
+            new SlimeBottleItem(new Item.Properties().stacksTo(16))
+    );
+
     // 初期化メソッド(onInitializeから呼ぶ)
     public static void registerModItems() {
         SlimeAriseMod.LOGGER.info("Registering Mod Items for " + SlimeAriseMod.MOD_ID);
 
         DispenserBlock.registerProjectileBehavior(ModItems.SLIME_ARROW);
         DispenserBlock.registerProjectileBehavior(ModItems.STICKY_TORCH);
+        DispenserBlock.registerProjectileBehavior(ModItems.SLIME_BOTTLE);
 
 //        // クリエイティブタブへの追加(後で専用タブに変更)
 //        ItemGroupEvents.modifyEntriesEvent(CreativeModeTabs.INGREDIENTS).register(entries -> {
