@@ -3,13 +3,13 @@
 	"id": "slimearisemod",
 	"version": "${version}",
 	"name": "SlimeAriseMod",
-	"description": "This is an example description! Tell everyone what your mod is about!",
+	"description": "Adds 8 elemental slimes, boss King Slime, and unique slime-based combat & utility gear.",
 	"authors": [
 		"Me!"
 	],
 	"contact": {
-		"homepage": "https://fabricmc.net/",
-		"sources": "https://github.com/FabricMC/fabric-example-mod"
+		"homepage": "",
+		"sources": ""
 	},
 	"license": "CC0-1.0",
 	"icon": "assets/slimearisemod/icon.png",

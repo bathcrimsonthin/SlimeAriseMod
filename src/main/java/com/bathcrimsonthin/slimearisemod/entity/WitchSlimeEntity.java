@@ -216,8 +216,7 @@ public class WitchSlimeEntity extends Slime {
     @Override
     protected void dealDamage(LivingEntity target) {
         if (this.isAlive()) {
-            int size = this.getSize();
-            boolean willHit = this.distanceToSqr(target) < 0.6D * (double) size * 0.6D * (double) size && this.hasLineOfSight(target);
+            boolean willHit = this.isWithinMeleeAttackRange(target) && this.hasLineOfSight(target);
 
             super.dealDamage(target);
 
