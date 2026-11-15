@@ -12,6 +12,11 @@
   "item.slimearisemod.slimy_crown.fail.night": "夜でなければ反応しないようだ…",
   "item.slimearisemod.slimy_crown.fail.full_moon": "満月の夜でなければ力を発揮しないようだ…",
 
+  "item.slimearisemod.slimy_sword": "ぬるぬるした剣",
+  "item.slimearisemod.slimy_sword.tooltip": "右クリック：粘液結界",
+  "item.slimearisemod.slimy_sword.tooltip2": "地面に衝撃波を放ち、領域と配下スライムを召喚する",
+  "item.slimearisemod.slimy_sword.fail.air": "地面の近くでなければ突き刺せない！",
+
   "item.slimearisemod.wither_slime_ball.tooltip": "頭蓋骨を被ると...？",
 
   "item.slimearisemod.blaze_slime_spawn_egg": "ブレイズスライムのスポーンエッグ",

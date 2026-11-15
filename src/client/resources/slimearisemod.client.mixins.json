@@ -4,7 +4,12 @@
 	"compatibilityLevel": "JAVA_21",
 	"client": [
 		"ExampleClientMixin",
-		"EntityRenderDispatcherMixin"
+		"EntityRenderDispatcherMixin",
+		"CameraShakeMixin",
+		"ItemInHandRendererSlamMixin",
+		"HumanoidModelSlamMixin",
+		"ItemInHandLayerSlamMixin",
+		"ClientPlayerSlamMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1

@@ -7,7 +7,12 @@
 		"AreaEffectCloudAccessor",
 		"ResultSlotMixin",
 		"PufferfishMixin",
-		"PufferfishMixin"
+		"PufferfishMixin",
+		"SlimeAllyMixin",
+		"LivingEntityAllyProtectionMixin",
+		"ExplosionAllyMixin",
+		"PlayerSlamMixin",
+		"LivingEntitySlamLockMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1

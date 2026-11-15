@@ -27,7 +27,7 @@ public class SlimeFieldRenderer extends EntityRenderer<SlimeFieldEntity> {
     public void render(SlimeFieldEntity entity, float entityYaw, float partialTick,
                        PoseStack poseStack, MultiBufferSource bufferSource, int packedLight) {
         float age = entity.tickCount + partialTick;
-        float remaining = SlimeFieldEntity.MAX_LIFETIME - age;
+        float remaining = entity.getMaxLifetime() - age;
         if (remaining <= 0.0F) {
             return;
         }

@@ -21,6 +21,7 @@ public class ModItemGroups {
                     // タブ内に表示するアイテムリスト
                     .displayItems((displayParameters, output) -> {
                         output.accept(ModItems.SLIMY_CROWN);
+                        output.accept(ModItems.SLIMY_SWORD);
                         output.accept(ModItems.BLAZE_SLIME_BALL);
                         output.accept(ModItems.WITCH_SLIME_BALL);
                         output.accept(ModItems.ENDER_SLIME_BALL);

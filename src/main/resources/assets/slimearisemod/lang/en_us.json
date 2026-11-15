@@ -12,6 +12,11 @@
   "item.slimearisemod.slimy_crown.fail.night": "It only reacts at night...",
   "item.slimearisemod.slimy_crown.fail.full_moon": "It requires the light of a full moon...",
 
+  "item.slimearisemod.slimy_sword": "Slimy Sword",
+  "item.slimearisemod.slimy_sword.tooltip": "Right-Click: Slime Barrier",
+  "item.slimearisemod.slimy_sword.tooltip2": "Slams the ground to deploy slime fields and summon loyal slimes",
+  "item.slimearisemod.slimy_sword.fail.air": "You must be near the ground to slam the sword!",
+
   "item.slimearisemod.wither_slime_ball.tooltip": "Wearing a skull...?",
 
   "item.slimearisemod.blaze_slime_spawn_egg": "Blaze Slime Spawn Egg",

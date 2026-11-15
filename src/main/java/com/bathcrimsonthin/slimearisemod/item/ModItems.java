@@ -6,11 +6,8 @@ import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.food.FoodProperties;
-import net.minecraft.world.item.CreativeModeTabs;
-import net.minecraft.world.item.Item;
+import net.minecraft.world.item.*;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.item.Rarity;
-import net.minecraft.world.item.SpawnEggItem;
 
 public class ModItems {
     // アイテム登録用ヘルパーメソッド
@@ -133,6 +130,15 @@ public class ModItems {
     public static final Item SLIMY_CROWN = registerItem(
             "slimy_crown",
             new SlimyCrownItem(new Item.Properties().stacksTo(1).rarity(Rarity.RARE))
+    );
+
+    public static final Item SLIMY_SWORD = registerItem(
+            "slimy_sword",
+            new SlimySwordItem(
+                    new Item.Properties()
+                            .rarity(Rarity.EPIC)
+                            .attributes(SwordItem.createAttributes(SlimySwordItem.SLIMY_TIER, 6, -2.4F))
+            )
     );
 
     // 初期化メソッド(onInitializeから呼ぶ)
