@@ -141,6 +141,11 @@ public class ModItems {
             )
     );
 
+    public static final Item SLIME_GUMMY = registerItem(
+            "slime_gummy",
+            new SlimeGummyItem(new Item.Properties().food(SlimeGummyItem.SLIME_GUMMY_FOOD))
+    );
+
     // 初期化メソッド(onInitializeから呼ぶ)
     public static void registerModItems() {
         SlimeAriseMod.LOGGER.info("Registering Mod Items for " + SlimeAriseMod.MOD_ID);
