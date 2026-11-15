@@ -1,5 +1,6 @@
 package com.bathcrimsonthin.slimearisemod.item;
 
+import com.bathcrimsonthin.slimearisemod.advancement.ModCriteriaTriggers;
 import com.bathcrimsonthin.slimearisemod.entity.ThrownEnderSlimeBall;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Position;
@@ -41,6 +42,7 @@ public class EnderSlimeBallItem extends Item implements ProjectileItem {
             projectile.setItem(itemStack);
             projectile.shootFromRotation(player, player.getXRot(), player.getYRot(), 0.0F, 1.5F, 1.0F);
             level.addFreshEntity(projectile);
+            ModCriteriaTriggers.onThrowEnderSlimeBall(player);
         }
 
         player.awardStat(Stats.ITEM_USED.get(this));

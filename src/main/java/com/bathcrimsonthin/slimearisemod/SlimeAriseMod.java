@@ -1,7 +1,9 @@
 package com.bathcrimsonthin.slimearisemod;
 
+import com.bathcrimsonthin.slimearisemod.advancement.ModCriteriaTriggers;
 import com.bathcrimsonthin.slimearisemod.block.ModBlocks;
 import com.bathcrimsonthin.slimearisemod.entity.ModEntities;
+import com.bathcrimsonthin.slimearisemod.entity.ModEntitySpawns;
 import com.bathcrimsonthin.slimearisemod.item.ModItemGroups;
 import com.bathcrimsonthin.slimearisemod.item.ModItems;
 import com.bathcrimsonthin.slimearisemod.mixin.AreaEffectCloudAccessor;
@@ -39,6 +41,8 @@ public class SlimeAriseMod implements ModInitializer {
 		ModEntities.registerModEntities();
 		ModParticles.registerModParticles();
 		ModRecipes.registerRecipes();
+		ModEntitySpawns.registerSpawns();
+		ModCriteriaTriggers.registerTriggers();
 	}
 
 }

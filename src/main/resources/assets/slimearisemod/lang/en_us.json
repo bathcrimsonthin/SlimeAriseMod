@@ -58,5 +58,56 @@
   "entity.slimearisemod.wither_slime": "Wither Slime",
   "entity.slimearisemod.king_slime": "King Slime",
   "entity.slimearisemod.king_slime.giant_armor": "King Slime - Giant Armor",
-  "entity.slimearisemod.slime_field": "Slime Field"
+  "entity.slimearisemod.slime_field": "Slime Field",
+
+  "advancements.slimearisemod.root.title": "Slime Arise",
+  "advancements.slimearisemod.root.description": "Obtain a Slimeball and step into a world of new slimes",
+
+  "advancements.slimearisemod.kill_blaze_slime.title": "Scorching Jelly",
+  "advancements.slimearisemod.kill_blaze_slime.description": "Defeat a Blaze Slime",
+  "advancements.slimearisemod.eat_blaze_slime_ball.title": "Fiery Snack",
+  "advancements.slimearisemod.eat_blaze_slime_ball.description": "Eat a Blaze Slimeball",
+
+  "advancements.slimearisemod.kill_rabbit_slime.title": "Hoppy Slime",
+  "advancements.slimearisemod.kill_rabbit_slime.description": "Defeat a Rabbit Slime",
+
+  "advancements.slimearisemod.kill_witch_slime.title": "Suspicious Brew",
+  "advancements.slimearisemod.kill_witch_slime.description": "Defeat a Witch Slime",
+  "advancements.slimearisemod.craft_witch_lingering_potion.title": "Witch's Special Brew",
+  "advancements.slimearisemod.craft_witch_lingering_potion.description": "Craft a Lingering Potion using a Witch Slimeball",
+
+  "advancements.slimearisemod.kill_bomb_slime.title": "Handle With Care!",
+  "advancements.slimearisemod.kill_bomb_slime.description": "Defeat a Bomb Slime",
+
+  "advancements.slimearisemod.kill_pufferfish_slime.title": "Spiky Hazard",
+  "advancements.slimearisemod.kill_pufferfish_slime.description": "Defeat a Pufferfish Slime",
+
+  "advancements.slimearisemod.kill_ender_slime.title": "Otherworldly Goo",
+  "advancements.slimearisemod.kill_ender_slime.description": "Defeat an Ender Slime",
+  "advancements.slimearisemod.throw_ender_slime_ball.title": "Squishy Warp",
+  "advancements.slimearisemod.throw_ender_slime_ball.description": "Throw an Ender Slimeball",
+
+  "advancements.slimearisemod.kill_wither_slime.title": "Withering Ooze",
+  "advancements.slimearisemod.kill_wither_slime.description": "Defeat a Wither Slime",
+  "advancements.slimearisemod.eat_wither_slime_ball.title": "Forbidden Tasting",
+  "advancements.slimearisemod.eat_wither_slime_ball.description": "Eat a Wither Slimeball while wearing a Wither Skeleton Skull",
+
+  "advancements.slimearisemod.kill_stonecutter_slime.title": "Watch the Blade",
+  "advancements.slimearisemod.kill_stonecutter_slime.description": "Defeat a Stonecutter Slime",
+
+  "advancements.slimearisemod.craft_slimy_crown.title": "Challenge to the King",
+  "advancements.slimearisemod.craft_slimy_crown.description": "Craft a Slimy Crown",
+  "advancements.slimearisemod.kill_king_slime.title": "Regicide of Slime",
+  "advancements.slimearisemod.kill_king_slime.description": "Defeat the King Slime",
+  "advancements.slimearisemod.use_slimy_sword.title": "Slime Domain Expansion!",
+  "advancements.slimearisemod.use_slimy_sword.description": "Right-click to use the Slimy Sword",
+
+  "advancements.slimearisemod.craft_slime_gummy.title": "Chewy Treat",
+  "advancements.slimearisemod.craft_slime_gummy.description": "Craft a Slime Gummy",
+  "advancements.slimearisemod.craft_slime_pudding.title": "Jiggly Dessert",
+  "advancements.slimearisemod.craft_slime_pudding.description": "Craft a Slime Pudding",
+  "advancements.slimearisemod.craft_slime_arrow.title": "Bouncing Shot",
+  "advancements.slimearisemod.craft_slime_arrow.description": "Craft a Slime Arrow",
+  "advancements.slimearisemod.craft_sticky_torch.title": "Light Anywhere",
+  "advancements.slimearisemod.craft_sticky_torch.description": "Craft a Sticky Torch"
 }

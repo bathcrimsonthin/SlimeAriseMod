@@ -1,5 +1,6 @@
 package com.bathcrimsonthin.slimearisemod.item;
 
+import com.bathcrimsonthin.slimearisemod.advancement.ModCriteriaTriggers;
 import com.bathcrimsonthin.slimearisemod.entity.AlliedSlimeHelper;
 import com.bathcrimsonthin.slimearisemod.entity.ModEntities;
 import com.bathcrimsonthin.slimearisemod.entity.SlamAnimationHelper;
@@ -131,6 +132,7 @@ public class SlimySwordItem extends SwordItem {
         }
         player.getCooldowns().addCooldown(this, DOMAIN_COOLDOWN_TICKS);
 
+        ModCriteriaTriggers.onUseSlimySword(player);
         return InteractionResultHolder.consume(stack);
     }
 

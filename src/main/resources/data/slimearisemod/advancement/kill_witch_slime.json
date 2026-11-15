@@ -1,0 +1,28 @@
+{
+  "parent": "slimearisemod:root",
+  "display": {
+    "icon": {
+      "id": "slimearisemod:witch_slime_ball"
+    },
+    "title": {
+      "translate": "advancements.slimearisemod.kill_witch_slime.title"
+    },
+    "description": {
+      "translate": "advancements.slimearisemod.kill_witch_slime.description"
+    },
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "kill_witch_slime": {
+      "trigger": "minecraft:player_killed_entity",
+      "conditions": {
+        "entity": {
+          "type": "slimearisemod:witch_slime"
+        }
+      }
+    }
+  }
+}

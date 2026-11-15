@@ -1,0 +1,23 @@
+{
+  "parent": "slimearisemod:kill_king_slime",
+  "display": {
+    "icon": {
+      "id": "slimearisemod:slimy_sword"
+    },
+    "title": {
+      "translate": "advancements.slimearisemod.use_slimy_sword.title"
+    },
+    "description": {
+      "translate": "advancements.slimearisemod.use_slimy_sword.description"
+    },
+    "frame": "goal",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "use_slimy_sword": {
+      "trigger": "slimearisemod:use_slimy_sword"
+    }
+  }
+}

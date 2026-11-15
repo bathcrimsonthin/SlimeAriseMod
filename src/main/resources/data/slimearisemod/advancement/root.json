@@ -1,0 +1,30 @@
+{
+  "display": {
+    "icon": {
+      "id": "minecraft:slime_ball"
+    },
+    "title": {
+      "translate": "advancements.slimearisemod.root.title"
+    },
+    "description": {
+      "translate": "advancements.slimearisemod.root.description"
+    },
+    "background": "minecraft:textures/block/slime_block.png",
+    "frame": "task",
+    "show_toast": false,
+    "announce_to_chat": false,
+    "hidden": false
+  },
+  "criteria": {
+    "get_slime_ball": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "minecraft:slime_ball"
+          }
+        ]
+      }
+    }
+  }
+}

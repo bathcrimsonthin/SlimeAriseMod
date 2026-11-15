@@ -1,0 +1,31 @@
+{
+  "parent": "slimearisemod:craft_slimy_crown",
+  "display": {
+    "icon": {
+      "id": "slimearisemod:slimy_sword"
+    },
+    "title": {
+      "translate": "advancements.slimearisemod.kill_king_slime.title"
+    },
+    "description": {
+      "translate": "advancements.slimearisemod.kill_king_slime.description"
+    },
+    "frame": "challenge",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "rewards": {
+    "experience": 100
+  },
+  "criteria": {
+    "kill_king_slime": {
+      "trigger": "minecraft:player_killed_entity",
+      "conditions": {
+        "entity": {
+          "type": "slimearisemod:king_slime"
+        }
+      }
+    }
+  }
+}

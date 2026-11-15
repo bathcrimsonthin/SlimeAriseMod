@@ -1,5 +1,6 @@
 package com.bathcrimsonthin.slimearisemod.item;
 
+import com.bathcrimsonthin.slimearisemod.advancement.ModCriteriaTriggers;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
@@ -71,6 +72,7 @@ public class WitherSlimeBallItem extends Item {
                 if (level instanceof ServerLevel serverLevel) {
                     serverLevel.sendParticles(ParticleTypes.SMOKE, spawnX, spawnY, spawnZ, 8, 0.1D, 0.1D, 0.1D, 0.05D);
                 }
+                ModCriteriaTriggers.onEatWitherSlimeBall(livingEntity);
             } else {
                 // 被っていない場合：ウィザー状態を付与（10秒）
                 livingEntity.addEffect(new MobEffectInstance(MobEffects.WITHER, 200, 0));

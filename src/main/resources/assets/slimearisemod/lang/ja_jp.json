@@ -58,5 +58,56 @@
   "entity.slimearisemod.wither_slime": "ウィザースライム",
   "entity.slimearisemod.king_slime": "キングスライム",
   "entity.slimearisemod.king_slime.giant_armor": "キングスライム - 巨大アーマー",
-  "entity.slimearisemod.slime_field": "スライムフィールド"
+  "entity.slimearisemod.slime_field": "スライムフィールド",
+
+  "advancements.slimearisemod.root.title": "Slime Arise",
+  "advancements.slimearisemod.root.description": "スライムボールを手に入れ、新たなスライムたちの世界へ踏み出す",
+
+  "advancements.slimearisemod.kill_blaze_slime.title": "灼熱のゼリー",
+  "advancements.slimearisemod.kill_blaze_slime.description": "ブレイズスライムを討伐する",
+  "advancements.slimearisemod.eat_blaze_slime_ball.title": "燃えるおやつ",
+  "advancements.slimearisemod.eat_blaze_slime_ball.description": "ブレイズスライムボールを食べる",
+
+  "advancements.slimearisemod.kill_rabbit_slime.title": "ぴょんぴょんスライム",
+  "advancements.slimearisemod.kill_rabbit_slime.description": "ウサギスライムを討伐する",
+
+  "advancements.slimearisemod.kill_witch_slime.title": "怪しい調合液",
+  "advancements.slimearisemod.kill_witch_slime.description": "ウィッチスライムを討伐する",
+  "advancements.slimearisemod.craft_witch_lingering_potion.title": "魔女の特製ポーション",
+  "advancements.slimearisemod.craft_witch_lingering_potion.description": "ウィッチスライムボールを使って残留ポーションを作成する",
+
+  "advancements.slimearisemod.kill_bomb_slime.title": "爆発注意！",
+  "advancements.slimearisemod.kill_bomb_slime.description": "ボムスライムを討伐する",
+
+  "advancements.slimearisemod.kill_pufferfish_slime.title": "トゲトゲ注意報",
+  "advancements.slimearisemod.kill_pufferfish_slime.description": "フグスライムを討伐する",
+
+  "advancements.slimearisemod.kill_ender_slime.title": "異次元の粘液",
+  "advancements.slimearisemod.kill_ender_slime.description": "エンダースライムを討伐する",
+  "advancements.slimearisemod.throw_ender_slime_ball.title": "ぷにっとワープ",
+  "advancements.slimearisemod.throw_ender_slime_ball.description": "エンダースライムボールを投げる",
+
+  "advancements.slimearisemod.kill_wither_slime.title": "凋落の粘塊",
+  "advancements.slimearisemod.kill_wither_slime.description": "ウィザースライムを討伐する",
+  "advancements.slimearisemod.eat_wither_slime_ball.title": "禁断の試食",
+  "advancements.slimearisemod.eat_wither_slime_ball.description": "ウィザースケルトンの頭蓋骨を被った状態でウィザースライムボールを食べる",
+
+  "advancements.slimearisemod.kill_stonecutter_slime.title": "回転ノコギリ注意",
+  "advancements.slimearisemod.kill_stonecutter_slime.description": "石切り台スライムを討伐する",
+
+  "advancements.slimearisemod.craft_slimy_crown.title": "王への挑戦状",
+  "advancements.slimearisemod.craft_slimy_crown.description": "ぬるぬるした王冠を作成する",
+  "advancements.slimearisemod.kill_king_slime.title": "キングスライムの討伐",
+  "advancements.slimearisemod.kill_king_slime.description": "キングスライムを討伐する",
+  "advancements.slimearisemod.use_slimy_sword.title": "スライム領域展開！",
+  "advancements.slimearisemod.use_slimy_sword.description": "ぬるぬるした剣を右クリックで使用する",
+
+  "advancements.slimearisemod.craft_slime_gummy.title": "ぷにぷに食感",
+  "advancements.slimearisemod.craft_slime_gummy.description": "スライムグミを作成する",
+  "advancements.slimearisemod.craft_slime_pudding.title": "ぷるぷるスイーツ",
+  "advancements.slimearisemod.craft_slime_pudding.description": "スライムプリンを作成する",
+  "advancements.slimearisemod.craft_slime_arrow.title": "跳ね返る一矢",
+  "advancements.slimearisemod.craft_slime_arrow.description": "スライムの矢を作成する",
+  "advancements.slimearisemod.craft_sticky_torch.title": "どこでも明かり",
+  "advancements.slimearisemod.craft_sticky_torch.description": "粘着たいまつを作成する"
 }

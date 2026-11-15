@@ -1,0 +1,23 @@
+{
+  "parent": "slimearisemod:kill_ender_slime",
+  "display": {
+    "icon": {
+      "id": "slimearisemod:ender_slime_ball"
+    },
+    "title": {
+      "translate": "advancements.slimearisemod.throw_ender_slime_ball.title"
+    },
+    "description": {
+      "translate": "advancements.slimearisemod.throw_ender_slime_ball.description"
+    },
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "throw_ender_slime_ball": {
+      "trigger": "slimearisemod:throw_ender_slime_ball"
+    }
+  }
+}

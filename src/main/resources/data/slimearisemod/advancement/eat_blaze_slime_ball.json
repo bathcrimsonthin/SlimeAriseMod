@@ -1,0 +1,28 @@
+{
+  "parent": "slimearisemod:kill_blaze_slime",
+  "display": {
+    "icon": {
+      "id": "slimearisemod:blaze_slime_ball"
+    },
+    "title": {
+      "translate": "advancements.slimearisemod.eat_blaze_slime_ball.title"
+    },
+    "description": {
+      "translate": "advancements.slimearisemod.eat_blaze_slime_ball.description"
+    },
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "eat_blaze_slime_ball": {
+      "trigger": "minecraft:consume_item",
+      "conditions": {
+        "item": {
+          "items": "slimearisemod:blaze_slime_ball"
+        }
+      }
+    }
+  }
+}

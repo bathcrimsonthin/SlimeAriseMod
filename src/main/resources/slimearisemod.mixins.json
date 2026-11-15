@@ -12,7 +12,10 @@
 		"LivingEntityAllyProtectionMixin",
 		"ExplosionAllyMixin",
 		"PlayerSlamMixin",
-		"LivingEntitySlamLockMixin"
+		"LivingEntitySlamLockMixin",
+		"SlimeSpawnMixin",
+		"NetherFortressSpawnMixin",
+		"ResultSlotAdvancementMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1

@@ -1,0 +1,23 @@
+{
+  "parent": "slimearisemod:kill_witch_slime",
+  "display": {
+    "icon": {
+      "id": "minecraft:lingering_potion"
+    },
+    "title": {
+      "translate": "advancements.slimearisemod.craft_witch_lingering_potion.title"
+    },
+    "description": {
+      "translate": "advancements.slimearisemod.craft_witch_lingering_potion.description"
+    },
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "craft_witch_potion": {
+      "trigger": "slimearisemod:witch_lingering_potion"
+    }
+  }
+}

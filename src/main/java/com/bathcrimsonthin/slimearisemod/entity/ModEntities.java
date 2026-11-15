@@ -62,10 +62,9 @@ public class ModEntities {
             EntityType.Builder.of(EnderSlimeEntity::new, MobCategory.MONSTER)
                     .sized(0.5202F, 1.0404F)       // 横幅 0.5202F, 高さ 1.0404F (縦2倍)
                     .eyeHeight(0.845F)              // 上部の目の位置に合わせた視線高さ
-                    .spawnDimensionsScale(24.0F)     // Size 4 スポーン時の当たり判定倍率
+                    .spawnDimensionsScale(4.0F)     // 24.0F → 4.0F に修正（Size 4 スポーン時の当たり判定倍率）
                     .clientTrackingRange(10)        // クライアント同期の追跡距離
                     .build("ender_slime")
-
     );
 
     public static final EntityType<ThrownEnderSlimeBall> ENDER_SLIME_BALL = Registry.register(

@@ -1,0 +1,30 @@
+{
+  "parent": "slimearisemod:root",
+  "display": {
+    "icon": {
+      "id": "slimearisemod:slimy_crown"
+    },
+    "title": {
+      "translate": "advancements.slimearisemod.craft_slimy_crown.title"
+    },
+    "description": {
+      "translate": "advancements.slimearisemod.craft_slimy_crown.description"
+    },
+    "frame": "goal",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "craft_slimy_crown": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "slimearisemod:slimy_crown"
+          }
+        ]
+      }
+    }
+  }
+}
