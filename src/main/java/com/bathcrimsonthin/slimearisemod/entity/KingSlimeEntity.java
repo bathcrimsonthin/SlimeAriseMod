@@ -59,6 +59,14 @@ public class KingSlimeEntity extends Slime {
     private static final float MAX_MAIN_HP = 100.0F;
     private static final float MAX_GIANT_HP = 50.0F;
 
+    private static final float GIANT_PROJECTILE_DAMAGE_MULTIPLIER = 0.60F; // 巨大アーマー中は飛翔体ダメージ40%軽減
+    private static final float RANGED_COUNTER_CHANCE = 0.50F;              // 遠距離被弾カウンターの発生確率（50%）
+    private static final int RANGED_COUNTER_COOLDOWN_TICKS = 80;           // 遠距離被弾カウンターのクールダウン（4.0秒）
+    private static final double RANGED_COUNTER_MIN_DIST_SQR = 64.0D;       // 遠距離判定距離（8ブロック以上）
+    private static final int HIGH_LEAP_INTERVAL = 3;                       // 巨大形態で大ジャンプ落下を行う間隔（3回に1回）
+    private static final int HIGH_LEAP_CHARGE_DURATION = 20;               // 大ジャンプ前の予備動作タメ時間（1.0秒）
+    private static final double MAX_HIGH_LEAP_RANGE = 22.0D;               // 大ジャンプの最大水平射程
+
     private static final int MIN_ABSORB_COUNT = 4;        // 周囲にいない場合の最低補充数
     private static final int MAX_ABSORB_COUNT = 20;       // 周囲に多数いる場合の最大吸収数
     private static final int ABSORB_DURATION_TICKS = 80;  // 吸収シーケンス時間（4.0秒）
@@ -95,10 +103,20 @@ public class KingSlimeEntity extends Slime {
     private int normalElapsedTicks = 0;
     private int summonCooldown = 120;
 
+    private int rangedCounterCooldown = 0;
+    private int giantJumpCounter = 0;
+    private int leapChargeTicks = 0;
+    private boolean isPerformingHighLeap = false;
+    private int highLeapTicks = 0;
+    private double leapTargetX = 0.0D;
+    private double leapTargetY = 0.0D;
+    private double leapTargetZ = 0.0D;
+    private int contactDamageGraceTicks = 0;
+    private boolean droppedCeilingJellyThisJump = false;
+
     private int absorbTimer = 0;
     private final List<UUID> absorbingSlimeIds = new ArrayList<>();
     private boolean wasOnGroundLastTick = true;
-    private boolean wasProjectileImmuneLastTick = false;
 
     public KingSlimeEntity(EntityType<? extends Slime> entityType, Level level) {
         super(entityType, level);
@@ -160,13 +178,12 @@ public class KingSlimeEntity extends Slime {
         return this.getKingState() == STATE_ABSORBING;
     }
 
-    public boolean isBelowHalfHealth() {
-        return this.getHealth() < this.getMaxHealth() * 0.5F;
+    public boolean isChargingHighLeap() {
+        return this.leapChargeTicks > 0;
     }
 
-    // 体力半分以下のときは巨大化中も含めて飛翔体耐性が有効
-    public boolean isProjectileImmune() {
-        return this.isBelowHalfHealth();
+    public boolean isBelowHalfHealth() {
+        return this.getHealth() < this.getMaxHealth() * 0.5F;
     }
 
     @Nullable
@@ -185,7 +202,8 @@ public class KingSlimeEntity extends Slime {
         this.goalSelector.addGoal(2, new KingSlimeDirectionalGoal(this));
         this.goalSelector.addGoal(3, new KingSlimeRandomDirectionGoal(this));
         this.goalSelector.addGoal(5, new KingSlimeKeepOnJumpingGoal(this));
-        this.targetSelector.addGoal(1, new NearestAttackableTargetGoal<>(this, Player.class, true));
+        // 巨大化による視線高さの変化で見失わないよう mustSee = false に設定
+        this.targetSelector.addGoal(1, new NearestAttackableTargetGoal<>(this, Player.class, false));
     }
 
     @Override
@@ -193,6 +211,13 @@ public class KingSlimeEntity extends Slime {
         super.tick();
 
         if (!this.level().isClientSide && this.level() instanceof ServerLevel serverLevel && this.isAlive()) {
+            if (this.rangedCounterCooldown > 0) {
+                this.rangedCounterCooldown--;
+            }
+            if (this.contactDamageGraceTicks > 0) {
+                this.contactDamageGraceTicks--;
+            }
+
             int state = this.getKingState();
 
             if (state == STATE_NORMAL) {
@@ -207,35 +232,6 @@ public class KingSlimeEntity extends Slime {
                 this.preventSubordinateFriendlyFire(serverLevel);
             }
 
-            // 飛翔体耐性の視覚・聴覚フィードバック＆ボスバー色切り替え
-            boolean projectileImmune = this.isProjectileImmune();
-            if (projectileImmune && !this.wasProjectileImmuneLastTick) {
-                this.playSound(SoundEvents.SHIELD_BLOCK, 1.2F, 1.3F);
-                serverLevel.sendParticles(
-                        ParticleTypes.ENCHANTED_HIT,
-                        this.getX(),
-                        this.getY(0.5D),
-                        this.getZ(),
-                        24,
-                        0.6D,
-                        0.5D,
-                        0.6D,
-                        0.15D
-                );
-            }
-            this.wasProjectileImmuneLastTick = projectileImmune;
-
-            if (projectileImmune) {
-                this.spawnProjectileShieldParticles(serverLevel);
-            }
-
-            BossEvent.BossBarColor desiredColor = projectileImmune
-                    ? BossEvent.BossBarColor.BLUE
-                    : BossEvent.BossBarColor.GREEN;
-            if (this.mainBossEvent.getColor() != desiredColor) {
-                this.mainBossEvent.setColor(desiredColor);
-            }
-
             this.mainBossEvent.setProgress(this.getHealth() / this.getMaxHealth());
             this.giantBossEvent.setVisible(state == STATE_GIANT);
             if (state == STATE_GIANT) {
@@ -244,24 +240,6 @@ public class KingSlimeEntity extends Slime {
         }
 
         this.wasOnGroundLastTick = this.onGround();
-    }
-
-    // 飛翔体耐性があることを示す回転バリアオーラ（巨大化時はサイズに合わせて高さ・数を拡張）
-    private void spawnProjectileShieldParticles(ServerLevel serverLevel) {
-        if (this.tickCount % 2 != 0) {
-            return;
-        }
-        double radius = this.getBbWidth() * 0.65D;
-        double baseAngle = this.tickCount * 0.25D;
-        int particleCount = this.isGiant() ? 8 : 2;
-        for (int i = 0; i < particleCount; i++) {
-            double angle = baseAngle + (Math.PI * 2.0D / particleCount) * i;
-            double heightRatio = 0.15D + ((this.tickCount + i * 3) % 10) * 0.075D;
-            double px = this.getX() + Math.cos(angle) * radius;
-            double py = this.getY() + this.getBbHeight() * heightRatio;
-            double pz = this.getZ() + Math.sin(angle) * radius;
-            serverLevel.sendParticles(ParticleTypes.ENCHANTED_HIT, px, py, pz, 1, 0.0D, 0.0D, 0.0D, 0.0D);
-        }
     }
 
     private void preventSubordinateFriendlyFire(ServerLevel serverLevel) {
@@ -289,7 +267,7 @@ public class KingSlimeEntity extends Slime {
             List<Slime> nearby = serverLevel.getEntitiesOfClass(
                     Slime.class,
                     this.getBoundingBox().inflate(16.0D),
-                    s -> s.isAlive() && !(s instanceof KingSlimeEntity)
+                    s -> s.isAlive() && !s.isTiny() && !(s instanceof KingSlimeEntity)
             );
             if (nearby.size() < 12) {
                 int count = 2 + this.random.nextInt(2);
@@ -438,6 +416,12 @@ public class KingSlimeEntity extends Slime {
         this.setSize(GIANT_SIZE, false);
         this.giantArmorHp = MAX_GIANT_HP;
         this.hasGiantOnce = true;
+        this.giantJumpCounter = 0;
+        this.leapChargeTicks = 0;
+        this.isPerformingHighLeap = false;
+        this.highLeapTicks = 0;
+        this.contactDamageGraceTicks = 0;
+        this.droppedCeilingJellyThisJump = false;
 
         this.playSound(SoundEvents.WITHER_SPAWN, 0.8F, 1.2F);
         this.playSound(SoundEvents.SLIME_SQUISH, 1.5F, 0.5F);
@@ -455,6 +439,98 @@ public class KingSlimeEntity extends Slime {
     }
 
     private void tickGiantState(ServerLevel serverLevel) {
+        // 1. 大ジャンプ前の予備動作（1.0秒タメ）処理
+        if (this.leapChargeTicks > 0) {
+            this.leapChargeTicks--;
+            Vec3 currentMotion = this.getDeltaMovement();
+            this.setDeltaMovement(0.0D, Math.min(0.0D, currentMotion.y), 0.0D);
+
+            // 足元にエネルギーが集まるチャージ演出
+            double chargeRadius = this.getBbWidth() * 0.58D;
+            for (int i = 0; i < 6; i++) {
+                double angle = this.random.nextDouble() * Math.PI * 2.0D;
+                double px = this.getX() + Math.cos(angle) * chargeRadius;
+                double pz = this.getZ() + Math.sin(angle) * chargeRadius;
+                serverLevel.sendParticles(ParticleTypes.ITEM_SLIME, px, this.getY() + 0.2D, pz, 1, 0.0D, 0.12D, 0.0D, 0.04D);
+                if (i % 2 == 0) {
+                    serverLevel.sendParticles(ParticleTypes.CLOUD, px, this.getY() + 0.15D, pz, 1, 0.0D, 0.05D, 0.0D, 0.01D);
+                }
+            }
+
+            if (this.leapChargeTicks == 10) {
+                this.playSound(SoundEvents.SLIME_SQUISH, 1.5F, 0.5F);
+            }
+
+            // タメ完了の瞬間にターゲット座標をロックオンして大ジャンプ発射
+            if (this.leapChargeTicks <= 0) {
+                this.executeHighLeap(serverLevel);
+            }
+            return;
+        }
+
+        // 2. 大ジャンプ中の空中軌道制御（跳躍瞬間のロックオン座標へ定点放物線移動＋着地予測リング表示）
+        if (this.isPerformingHighLeap && !this.onGround()) {
+            this.highLeapTicks++;
+            Vec3 motion = this.getDeltaMovement();
+
+            if (this.highLeapTicks <= 34) {
+                double dx = this.leapTargetX - this.getX();
+                double dz = this.leapTargetZ - this.getZ();
+                double remDist = Math.sqrt(dx * dx + dz * dz);
+
+                int remainingTravelTicks = Math.max(4, 36 - this.highLeapTicks);
+                double desiredSpeed = Math.min(1.05D, remDist / remainingTravelTicks);
+                double targetVx = (remDist > 0.05D) ? (dx / remDist) * desiredSpeed : 0.0D;
+                double targetVz = (remDist > 0.05D) ? (dz / remDist) * desiredSpeed : 0.0D;
+
+                double nextVx = Mth.lerp(0.32D, motion.x, targetVx);
+                double nextVz = Mth.lerp(0.32D, motion.z, targetVz);
+                // 頂点付近（14〜26tick）で一瞬フワッと滞空させ、合計約2.3秒の回避猶予を確保
+                double nextVy = (this.highLeapTicks >= 14 && this.highLeapTicks <= 26)
+                        ? motion.y + 0.024D
+                        : motion.y;
+                this.setDeltaMovement(nextVx, nextVy, nextVz);
+            } else {
+                // 目標真上を通過後は水平移動を抑え、真下へ急降下
+                double diveVy = Math.min(motion.y - 0.05D, -0.45D);
+                this.setDeltaMovement(motion.x * 0.65D, diveVy, motion.z * 0.65D);
+            }
+
+            // 着地予定地点の地面に危険エリアを示す円形リングパーティクルを表示
+            this.spawnLandingWarningParticles(serverLevel);
+
+            if (this.highLeapTicks % 2 == 0) {
+                serverLevel.sendParticles(
+                        ParticleTypes.ITEM_SLIME,
+                        this.getX(),
+                        this.getY() + 0.5D,
+                        this.getZ(),
+                        8,
+                        this.getBbWidth() * 0.3D,
+                        0.3D,
+                        this.getBbWidth() * 0.3D,
+                        0.05D
+                );
+            }
+
+            if (this.highLeapTicks > 120 || this.isInWater() || this.isInLava()) {
+                this.isPerformingHighLeap = false;
+                this.highLeapTicks = 0;
+            }
+        }
+
+        // 3. ジャンプ中に天井に頭をぶつけた場合、衝撃で剥がれたゼリーを真下に落として屋根ハメを防ぐ
+        if (!this.onGround() && this.verticalCollision && this.getDeltaMovement().y <= 0.05D && !this.droppedCeilingJellyThisJump) {
+            this.droppedCeilingJellyThisJump = true;
+            if (this.isPerformingHighLeap) {
+                this.leapTargetX = this.getX();
+                this.leapTargetZ = this.getZ();
+                this.leapTargetY = this.findGroundY(serverLevel, this.leapTargetX, this.getY(), this.leapTargetZ);
+            }
+            this.dropCeilingSlimeField(serverLevel);
+        }
+
+        // 4. 着地時の処理
         if (!this.wasOnGroundLastTick && this.onGround()) {
             List<Slime> underfootSlimes = serverLevel.getEntitiesOfClass(
                     Slime.class,
@@ -476,6 +552,13 @@ public class KingSlimeEntity extends Slime {
                 double knockStrength = 0.85D + this.random.nextDouble() * 0.35D;
                 slime.setDeltaMovement(dx * knockStrength, 0.45D + this.random.nextDouble() * 0.15D, dz * knockStrength);
                 slime.hurtMarked = true;
+            }
+
+            // 大ジャンプ落下からの着地時は円形衝撃波を発生させる
+            if (this.isPerformingHighLeap) {
+                this.performHighLeapLandingShockwave(serverLevel);
+                this.isPerformingHighLeap = false;
+                this.highLeapTicks = 0;
             }
 
             int deployedCount = 0;
@@ -502,6 +585,200 @@ public class KingSlimeEntity extends Slime {
         }
     }
 
+    private void executeHighLeap(ServerLevel serverLevel) {
+        LivingEntity target = this.getTarget();
+        if (target != null && target.isAlive()) {
+            double rawDx = target.getX() - this.getX();
+            double rawDz = target.getZ() - this.getZ();
+            double rawDist = Math.sqrt(rawDx * rawDx + rawDz * rawDz);
+
+            if (rawDist > MAX_HIGH_LEAP_RANGE) {
+                double scale = MAX_HIGH_LEAP_RANGE / rawDist;
+                this.leapTargetX = this.getX() + rawDx * scale;
+                this.leapTargetZ = this.getZ() + rawDz * scale;
+            } else {
+                this.leapTargetX = target.getX();
+                this.leapTargetZ = target.getZ();
+            }
+            this.leapTargetY = this.findGroundY(serverLevel, this.leapTargetX, target.getY(), this.leapTargetZ);
+        } else {
+            this.leapTargetX = this.getX();
+            this.leapTargetZ = this.getZ();
+            this.leapTargetY = this.getY();
+        }
+
+        double dx = this.leapTargetX - this.getX();
+        double dz = this.leapTargetZ - this.getZ();
+        double horizDist = Math.sqrt(dx * dx + dz * dz);
+
+        double jumpVy = 1.65D; // 到達高度 約16〜18ブロック
+        double initialSpeed = (horizDist > 0.05D) ? Math.min(1.05D, horizDist / 36.0D) : 0.0D;
+        double vx = (horizDist > 0.05D) ? (dx / horizDist) * initialSpeed : 0.0D;
+        double vz = (horizDist > 0.05D) ? (dz / horizDist) * initialSpeed : 0.0D;
+
+        this.setDeltaMovement(vx, jumpVy, vz);
+        this.hasImpulse = true;
+        this.isPerformingHighLeap = true;
+        this.highLeapTicks = 0;
+        this.droppedCeilingJellyThisJump = false;
+
+        this.playSound(SoundEvents.SLIME_JUMP, 1.9F, 0.45F);
+        serverLevel.sendParticles(
+                ParticleTypes.ITEM_SLIME,
+                this.getX(),
+                this.getY() + 0.3D,
+                this.getZ(),
+                32,
+                this.getBbWidth() * 0.4D,
+                0.25D,
+                this.getBbWidth() * 0.4D,
+                0.16D
+        );
+    }
+
+    private void spawnLandingWarningParticles(ServerLevel serverLevel) {
+        double shockRadius = this.getBbWidth() * 0.52D;
+        int ringPoints = 18;
+        double rotOffset = this.highLeapTicks * 0.12D;
+
+        for (int i = 0; i < ringPoints; i++) {
+            double angle = rotOffset + (Math.PI * 2.0D / ringPoints) * i;
+            double px = this.leapTargetX + Math.cos(angle) * shockRadius;
+            double pz = this.leapTargetZ + Math.sin(angle) * shockRadius;
+            serverLevel.sendParticles(
+                    ParticleTypes.ITEM_SLIME,
+                    px,
+                    this.leapTargetY + 0.12D,
+                    pz,
+                    1,
+                    0.0D,
+                    0.02D,
+                    0.0D,
+                    0.0D
+            );
+        }
+
+        if (this.highLeapTicks % 2 == 0) {
+            serverLevel.sendParticles(
+                    ParticleTypes.COMPOSTER,
+                    this.leapTargetX,
+                    this.leapTargetY + 0.18D,
+                    this.leapTargetZ,
+                    3,
+                    0.35D,
+                    0.05D,
+                    0.35D,
+                    0.0D
+            );
+        }
+    }
+
+    private void dropCeilingSlimeField(ServerLevel serverLevel) {
+        double groundY = this.findGroundY(serverLevel, this.getX(), this.getY(), this.getZ());
+        this.spawnFieldDirect(serverLevel, this.getX(), groundY, this.getZ());
+
+        if (this.isBelowHalfHealth() || this.isPerformingHighLeap) {
+            double angle = this.random.nextDouble() * Math.PI * 2.0D;
+            double offsetDist = 2.2D + this.random.nextDouble() * 1.2D;
+            double sx = this.getX() + Math.cos(angle) * offsetDist;
+            double sz = this.getZ() + Math.sin(angle) * offsetDist;
+            double sy = this.findGroundY(serverLevel, sx, this.getY(), sz);
+            this.trySpawnFieldOnEmptySpace(serverLevel, sx, sy, sz);
+        }
+
+        this.playSound(SoundEvents.SLIME_SQUISH, 1.5F, 0.65F);
+        serverLevel.sendParticles(
+                ParticleTypes.ITEM_SLIME,
+                this.getX(),
+                this.getY() + this.getBbHeight(),
+                this.getZ(),
+                18,
+                this.getBbWidth() * 0.3D,
+                0.2D,
+                this.getBbWidth() * 0.3D,
+                0.08D
+        );
+    }
+
+    private void performHighLeapLandingShockwave(ServerLevel serverLevel) {
+        this.playSound(SoundEvents.SLIME_SQUISH, 1.8F, 0.45F);
+        this.playSound(SoundEvents.GENERIC_EXPLODE.value(), 0.75F, 1.35F);
+
+        // 本体サイズとほぼ同じ半径の円形判定（予測リングと一致）
+        double shockRadius = this.getBbWidth() * 0.52D;
+        double shockRadiusSqr = shockRadius * shockRadius;
+
+        // 着地時に巨体へめり込んで連続接触ダメージを受けるのを防ぐ猶予時間（0.6秒）
+        this.contactDamageGraceTicks = 12;
+
+        serverLevel.sendParticles(
+                ParticleTypes.ITEM_SLIME,
+                this.getX(),
+                this.getY() + 0.25D,
+                this.getZ(),
+                40,
+                shockRadius * 0.65D,
+                0.2D,
+                shockRadius * 0.65D,
+                0.15D
+        );
+        serverLevel.sendParticles(
+                ParticleTypes.POOF,
+                this.getX(),
+                this.getY() + 0.2D,
+                this.getZ(),
+                16,
+                shockRadius * 0.55D,
+                0.15D,
+                shockRadius * 0.55D,
+                0.06D
+        );
+
+        AABB searchBox = this.getBoundingBox().inflate(1.5D, 1.5D, 1.5D);
+        List<LivingEntity> targets = serverLevel.getEntitiesOfClass(
+                LivingEntity.class,
+                searchBox,
+                e -> e.isAlive() && e != this && !(e instanceof Slime)
+        );
+
+        for (LivingEntity target : targets) {
+            if (target instanceof Player player && (player.isCreative() || player.isSpectator())) {
+                continue;
+            }
+            if (Math.abs(target.getY() - this.getY()) > 2.5D) {
+                continue;
+            }
+
+            double dx = target.getX() - this.getX();
+            double dz = target.getZ() - this.getZ();
+            double distSqr = dx * dx + dz * dz;
+            if (distSqr > shockRadiusSqr) {
+                continue;
+            }
+
+            double dist = Math.sqrt(distSqr);
+            double pushDirX;
+            double pushDirZ;
+            if (dist < 0.05D) {
+                double randAngle = this.random.nextDouble() * Math.PI * 2.0D;
+                pushDirX = Math.cos(randAngle);
+                pushDirZ = Math.sin(randAngle);
+            } else {
+                pushDirX = dx / dist;
+                pushDirZ = dz / dist;
+            }
+
+            // 盾ガード判定が正しく働くようターゲット方向を向いてダメージを与える
+            this.lookAt(target, 180.0F, 30.0F);
+            target.hurt(this.damageSources().mobAttack(this), 6.0F);
+
+            // 巨体の外周まで押し出して連続接触を防ぐ
+            double pushStrength = target.isBlocking() ? 0.95D : 1.25D;
+            target.setDeltaMovement(pushDirX * pushStrength, 0.38D, pushDirZ * pushStrength);
+            target.hurtMarked = true;
+        }
+    }
+
     private boolean trySpawnFieldOnEmptySpace(ServerLevel serverLevel, double x, double y, double z) {
         double minSpacing = SlimeFieldEntity.FIELD_RADIUS * 1.85D;
         AABB searchBox = new AABB(
@@ -518,17 +795,22 @@ public class KingSlimeEntity extends Slime {
             }
         }
 
+        this.spawnFieldDirect(serverLevel, x, y, z);
+        return true;
+    }
+
+    private void spawnFieldDirect(ServerLevel serverLevel, double x, double y, double z) {
         SlimeFieldEntity field = new SlimeFieldEntity(ModEntities.SLIME_FIELD, serverLevel);
         field.moveTo(x, y + 0.01D, z, 0.0F, 0.0F);
+        field.setCasterKing(this);
         serverLevel.addFreshEntity(field);
-        return true;
     }
 
     private double findGroundY(ServerLevel serverLevel, double x, double startY, double z) {
         int bx = Mth.floor(x);
         int bz = Mth.floor(z);
-        int topY = Mth.floor(startY) + 2;
-        int bottomY = Mth.floor(startY) - 3;
+        int topY = Mth.floor(startY) + 3;
+        int bottomY = Mth.floor(startY) - 4;
 
         for (int by = topY; by >= bottomY; by--) {
             BlockPos pos = new BlockPos(bx, by, bz);
@@ -539,7 +821,16 @@ public class KingSlimeEntity extends Slime {
         return startY;
     }
 
-    // 吸収シーケンス中の完全無敵 ＆ 壁埋まりによる窒息ダメージ無効化 ＆ 通常形態HP半分未満での飛翔体無効化
+    // 吸収中・大ジャンプタメ中・大ジャンプ着地直後は本体接触ダメージを発生させない
+    @Override
+    protected boolean isDealsDamage() {
+        if (this.isAbsorbing() || this.isChargingHighLeap() || this.contactDamageGraceTicks > 0) {
+            return false;
+        }
+        return super.isDealsDamage();
+    }
+
+    // 吸収シーケンス中の完全無敵 ＆ 壁埋まりによる窒息ダメージ無効化
     @Override
     public boolean isInvulnerableTo(DamageSource source) {
         if (source.is(DamageTypes.IN_WALL)) {
@@ -548,54 +839,11 @@ public class KingSlimeEntity extends Slime {
         if (this.isAbsorbing() && !source.is(DamageTypeTags.BYPASSES_INVULNERABILITY)) {
             return true;
         }
-        if (this.isProjectileImmune()
-                && (source.is(DamageTypeTags.IS_PROJECTILE) || source.getDirectEntity() instanceof Projectile)) {
-            return true;
-        }
         return super.isInvulnerableTo(source);
     }
 
     @Override
     public boolean hurt(DamageSource source, float amount) {
-        // HP半分以下の場合（巨大化中も含む）、飛翔体を弾き返して分かりやすくフィードバックする
-        if (this.isProjectileImmune()
-                && (source.is(DamageTypeTags.IS_PROJECTILE) || source.getDirectEntity() instanceof Projectile)) {
-            Entity direct = source.getDirectEntity();
-            if (direct != null) {
-                Vec3 deflected = direct.getDeltaMovement().scale(-0.45D).add(0.0D, 0.25D, 0.0D);
-                direct.setDeltaMovement(deflected);
-                direct.hurtMarked = true;
-
-                if (this.level() instanceof ServerLevel serverLevel) {
-                    serverLevel.sendParticles(
-                            ParticleTypes.CRIT,
-                            direct.getX(),
-                            direct.getY(),
-                            direct.getZ(),
-                            10,
-                            0.2D,
-                            0.2D,
-                            0.2D,
-                            0.12D
-                    );
-                    serverLevel.sendParticles(
-                            ParticleTypes.ITEM_SLIME,
-                            direct.getX(),
-                            direct.getY(),
-                            direct.getZ(),
-                            6,
-                            0.15D,
-                            0.15D,
-                            0.15D,
-                            0.06D
-                    );
-                }
-            }
-            this.playSound(SoundEvents.SHIELD_BLOCK, 1.1F, 1.25F);
-            this.playSound(SoundEvents.SLIME_JUMP, 0.9F, 1.4F);
-            return false;
-        }
-
         if (this.isInvulnerableTo(source)) {
             return false;
         }
@@ -622,8 +870,29 @@ public class KingSlimeEntity extends Slime {
             return;
         }
 
+        boolean isProjectileAttack = damageSource.is(DamageTypeTags.IS_PROJECTILE)
+                || damageSource.getDirectEntity() instanceof Projectile;
+
+        // 巨大形態（紫ゲージ展開中）は分厚いゼリー装甲により飛翔体ダメージを40%軽減する
+        float effectiveDamage = damageAmount;
+        if (this.isGiant() && isProjectileAttack) {
+            effectiveDamage *= GIANT_PROJECTILE_DAMAGE_MULTIPLIER;
+        }
+
+        // 遠距離攻撃（飛翔体または8ブロック以上離れた位置からの攻撃）に対するスライムフィールド展開カウンター（50%確率）
+        if (effectiveDamage > 0.0F
+                && this.rangedCounterCooldown <= 0
+                && this.level() instanceof ServerLevel serverLevel
+                && damageSource.getEntity() instanceof LivingEntity attacker
+                && !(attacker instanceof Slime)) {
+            boolean isFarAttack = this.distanceToSqr(attacker) >= RANGED_COUNTER_MIN_DIST_SQR;
+            if ((isProjectileAttack || isFarAttack) && this.random.nextFloat() < RANGED_COUNTER_CHANCE) {
+                this.triggerRangedCounter(serverLevel, attacker);
+            }
+        }
+
         if (this.isGiant()) {
-            this.giantArmorHp -= damageAmount;
+            this.giantArmorHp -= effectiveDamage;
             if (this.giantArmorHp <= 0.0F) {
                 this.giantArmorHp = 0.0F;
                 this.revertFromGiant();
@@ -631,8 +900,40 @@ public class KingSlimeEntity extends Slime {
             return;
         }
 
-        this.normalDamageTaken += damageAmount;
-        super.actuallyHurt(damageSource, damageAmount);
+        this.normalDamageTaken += effectiveDamage;
+        super.actuallyHurt(damageSource, effectiveDamage);
+    }
+
+    private void triggerRangedCounter(ServerLevel serverLevel, LivingEntity attacker) {
+        this.rangedCounterCooldown = RANGED_COUNTER_COOLDOWN_TICKS;
+
+        double ax = attacker.getX();
+        double az = attacker.getZ();
+        double ay = this.findGroundY(serverLevel, ax, attacker.getY(), az);
+        this.spawnFieldDirect(serverLevel, ax, ay, az);
+
+        // HP半分以下では攻撃者のすぐ近くにもう1つ追加展開する
+        if (this.isBelowHalfHealth()) {
+            double angle = this.random.nextDouble() * Math.PI * 2.0D;
+            double dist = 2.4D + this.random.nextDouble() * 1.0D;
+            double sx = ax + Math.cos(angle) * dist;
+            double sz = az + Math.sin(angle) * dist;
+            double sy = this.findGroundY(serverLevel, sx, attacker.getY(), sz);
+            this.trySpawnFieldOnEmptySpace(serverLevel, sx, sy, sz);
+        }
+
+        this.playSound(SoundEvents.SLIME_SQUISH, 1.2F, 1.15F);
+        serverLevel.sendParticles(
+                ParticleTypes.ITEM_SLIME,
+                ax,
+                ay + 0.15D,
+                az,
+                16,
+                0.7D,
+                0.15D,
+                0.7D,
+                0.08D
+        );
     }
 
     private void revertFromGiant() {
@@ -674,6 +975,11 @@ public class KingSlimeEntity extends Slime {
         this.setSize(NORMAL_SIZE, false);
         this.normalDamageTaken = 0.0F;
         this.normalElapsedTicks = 0;
+        this.leapChargeTicks = 0;
+        this.isPerformingHighLeap = false;
+        this.highLeapTicks = 0;
+        this.contactDamageGraceTicks = 0;
+        this.droppedCeilingJellyThisJump = false;
         this.playSound(SoundEvents.SLIME_SQUISH, 1.5F, 1.1F);
     }
 
@@ -702,15 +1008,33 @@ public class KingSlimeEntity extends Slime {
         return slime;
     }
 
-    // 通常形態ではバニラのスライムと同じジャンプ力、巨大形態時のみ高跳躍
+    // 通常形態ではバニラと同じジャンプ力、巨大形態では3回に1回予備動作（1.0秒タメ）を挟んで大ジャンプを行う
     @Override
     public void jumpFromGround() {
         if (!this.isGiant()) {
             super.jumpFromGround();
             return;
         }
+
+        if (this.leapChargeTicks > 0) {
+            return;
+        }
+
+        this.droppedCeilingJellyThisJump = false;
+        this.giantJumpCounter++;
+
+        LivingEntity target = this.getTarget();
+        if (target != null && target.isAlive() && this.giantJumpCounter % HIGH_LEAP_INTERVAL == 0) {
+            this.leapChargeTicks = HIGH_LEAP_CHARGE_DURATION;
+            this.playSound(SoundEvents.SLIME_SQUISH, 1.4F, 0.6F);
+            this.playSound(SoundEvents.PISTON_CONTRACT, 1.0F, 0.85F);
+            return;
+        }
+
+        this.isPerformingHighLeap = false;
+        this.highLeapTicks = 0;
         Vec3 motion = this.getDeltaMovement();
-        this.setDeltaMovement(motion.x, (double) (this.getJumpPower() * 1.85F), motion.z);
+        this.setDeltaMovement(motion.x, (double) (this.getJumpPower() * 1.45F), motion.z);
         this.hasImpulse = true;
     }
 
@@ -861,8 +1185,8 @@ public class KingSlimeEntity extends Slime {
             LivingEntity target = this.slime.getTarget();
             if (target != null && this.slime.getMoveControl() instanceof SlimeMoveControl moveControl) {
                 if (this.slime.isGiant()) {
-                    this.slime.lookAt(target, 10.0F, 10.0F);
-                    moveControl.setDirection(this.slime.getYRot(), true);
+                    this.slime.lookAt(target, 30.0F, 30.0F);
+                    moveControl.setDirection(this.slime.getYRot(), !this.slime.isChargingHighLeap());
                 } else {
                     double dx = this.slime.getX() - target.getX();
                     double dz = this.slime.getZ() - target.getZ();
@@ -889,6 +1213,7 @@ public class KingSlimeEntity extends Slime {
         @Override
         public boolean canUse() {
             return !this.slime.isAbsorbing()
+                    && !this.slime.isChargingHighLeap()
                     && this.slime.getTarget() == null
                     && (this.slime.onGround() || this.slime.isInWater() || this.slime.isInLava() || this.slime.hasEffect(MobEffects.LEVITATION))
                     && this.slime.getMoveControl() instanceof SlimeMoveControl;
@@ -916,7 +1241,7 @@ public class KingSlimeEntity extends Slime {
 
         @Override
         public boolean canUse() {
-            return !this.slime.isAbsorbing() && !this.slime.isPassenger();
+            return !this.slime.isAbsorbing() && !this.slime.isChargingHighLeap() && !this.slime.isPassenger();
         }
 
         @Override

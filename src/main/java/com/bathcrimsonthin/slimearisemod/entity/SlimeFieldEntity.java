@@ -18,6 +18,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
 
@@ -31,7 +32,10 @@ public class SlimeFieldEntity extends Entity {
 
     @Nullable
     private UUID ownerUuid = null;
-    private int spawnCooldown = 45;
+    @Nullable
+    private UUID casterKingUuid = null;
+    private float modSlimeChance = 0.25F;
+    private int spawnCooldown = 20;
 
     public SlimeFieldEntity(EntityType<?> entityType, Level level) {
         super(entityType, level);
@@ -40,11 +44,23 @@ public class SlimeFieldEntity extends Entity {
 
     public void setOwnerUuid(@Nullable UUID ownerUuid) {
         this.ownerUuid = ownerUuid;
+        if (ownerUuid != null && this.tickCount == 0) {
+            this.spawnCooldown = 45;
+        }
     }
 
     @Nullable
     public UUID getOwnerUuid() {
         return this.ownerUuid;
+    }
+
+    public void setCasterKing(KingSlimeEntity king) {
+        this.casterKingUuid = king.getUUID();
+        this.modSlimeChance = (king.getHealth() >= king.getMaxHealth() * 0.5F) ? 0.25F : 0.75F;
+    }
+
+    public void setModSlimeChance(float modSlimeChance) {
+        this.modSlimeChance = modSlimeChance;
     }
 
     public int getMaxLifetime() {
@@ -155,36 +171,109 @@ public class SlimeFieldEntity extends Entity {
             entity.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 15, 2, true, false));
         }
 
-        // フィールドからのスライム湧き（オーナーがいる場合は味方スライムとして召喚）
+        // 湧く直前の予兆パーティクル
+        if (this.spawnCooldown > 0 && this.spawnCooldown <= 15 && this.spawnCooldown % 3 == 0) {
+            serverLevel.sendParticles(
+                    ParticleTypes.ITEM_SLIME,
+                    this.getX(),
+                    this.getY() + 0.15D,
+                    this.getZ(),
+                    4,
+                    0.45D,
+                    0.1D,
+                    0.45D,
+                    0.06D
+            );
+        }
+
+        // フィールドからのスライム湧き
         if (this.spawnCooldown > 0) {
             this.spawnCooldown--;
         } else {
-            List<Slime> nearbySlimes = serverLevel.getEntitiesOfClass(
-                    Slime.class,
-                    this.getBoundingBox().inflate(14.0D),
-                    s -> s.isAlive() && !(s instanceof KingSlimeEntity)
-            );
-            int cap = (this.ownerUuid != null) ? 10 : 12;
-            if (nearbySlimes.size() < cap) {
-                double angle = this.random.nextDouble() * Math.PI * 2.0D;
-                double dist = this.random.nextDouble() * (FIELD_RADIUS * 0.65D);
-                double sx = this.getX() + Math.cos(angle) * dist;
-                double sz = this.getZ() + Math.sin(angle) * dist;
+            // 小サイズスライムが戦場に溜まりすぎている場合は古いものから自然消散させ、湧きを阻害しない
+            this.cleanupExcessTinySlimes(serverLevel);
 
-                if (this.ownerUuid != null) {
+            if (this.ownerUuid != null) {
+                List<Slime> nearbyCombatSlimes = serverLevel.getEntitiesOfClass(
+                        Slime.class,
+                        this.getBoundingBox().inflate(14.0D),
+                        s -> s.isAlive() && !s.isTiny() && !(s instanceof KingSlimeEntity)
+                );
+                if (nearbyCombatSlimes.size() < 10) {
+                    double angle = this.random.nextDouble() * Math.PI * 2.0D;
+                    double dist = this.random.nextDouble() * (FIELD_RADIUS * 0.65D);
+                    double sx = this.getX() + Math.cos(angle) * dist;
+                    double sz = this.getZ() + Math.sin(angle) * dist;
+
                     AlliedSlimeHelper.spawnMixedAlliedSlime(
                             serverLevel, sx, this.getY() + 0.2D, sz,
                             0.35F, 0.5F, 0.0D, 0.25D, 0.0D, this.ownerUuid
                     );
-                } else {
-                    KingSlimeEntity.spawnRatioSlime(
-                            serverLevel, sx, this.getY() + 0.2D, sz,
-                            2, 0.35F, 0.0D, 0.25D, 0.0D
-                    );
+                    this.playSound(SoundEvents.SLIME_SQUISH, 0.8F, 1.1F);
                 }
-                this.playSound(SoundEvents.SLIME_SQUISH, 0.8F, 1.1F);
+                this.spawnCooldown = 80 + this.random.nextInt(40);
+            } else {
+                // キングスライム等による敵対フィールド：小サイズを完全に無視し、戦闘圏内（近傍4m・広域14m）のみで判定
+                List<Slime> localCombatSlimes = serverLevel.getEntitiesOfClass(
+                        Slime.class,
+                        this.getBoundingBox().inflate(4.0D),
+                        s -> s.isAlive() && !s.isTiny() && !(s instanceof KingSlimeEntity)
+                );
+                List<Slime> wideCombatSlimes = serverLevel.getEntitiesOfClass(
+                        Slime.class,
+                        this.getBoundingBox().inflate(14.0D),
+                        s -> s.isAlive() && !s.isTiny() && !(s instanceof KingSlimeEntity)
+                );
+
+                if (localCombatSlimes.size() < 3 && wideCombatSlimes.size() < 16) {
+                    double angle = this.random.nextDouble() * Math.PI * 2.0D;
+                    double dist = 0.4D + this.random.nextDouble() * (FIELD_RADIUS * 0.6D);
+                    double sx = this.getX() + Math.cos(angle) * dist;
+                    double sz = this.getZ() + Math.sin(angle) * dist;
+
+                    float currentModChance = this.modSlimeChance;
+                    if (this.casterKingUuid != null
+                            && serverLevel.getEntity(this.casterKingUuid) instanceof KingSlimeEntity king
+                            && king.isAlive()) {
+                        currentModChance = (king.getHealth() >= king.getMaxHealth() * 0.5F) ? 0.25F : 0.75F;
+                        this.modSlimeChance = currentModChance;
+                    }
+
+                    KingSlimeEntity.spawnRatioSlime(
+                            serverLevel, sx, this.getY() + 0.35D, sz,
+                            2, currentModChance,
+                            Math.cos(angle) * 0.12D, 0.32D, Math.sin(angle) * 0.12D
+                    );
+                    serverLevel.sendParticles(
+                            ParticleTypes.ITEM_SLIME,
+                            sx, this.getY() + 0.25D, sz,
+                            10, 0.3D, 0.2D, 0.3D, 0.08D
+                    );
+                    this.playSound(SoundEvents.SLIME_SQUISH, 0.9F, 1.1F);
+                }
+                this.spawnCooldown = 45 + this.random.nextInt(20);
             }
-            this.spawnCooldown = (this.ownerUuid != null) ? (80 + this.random.nextInt(40)) : (65 + this.random.nextInt(35));
+        }
+    }
+
+    private void cleanupExcessTinySlimes(ServerLevel serverLevel) {
+        List<Slime> tinySlimes = serverLevel.getEntitiesOfClass(
+                Slime.class,
+                this.getBoundingBox().inflate(24.0D),
+                s -> s.isAlive() && s.isTiny() && !(s instanceof KingSlimeEntity)
+        );
+        int excess = tinySlimes.size() - 35;
+        if (excess > 0) {
+            tinySlimes.sort(Comparator.comparingInt((Slime s) -> s.tickCount).reversed());
+            for (int i = 0; i < excess; i++) {
+                Slime oldTiny = tinySlimes.get(i);
+                serverLevel.sendParticles(
+                        ParticleTypes.ITEM_SLIME,
+                        oldTiny.getX(), oldTiny.getY(0.5D), oldTiny.getZ(),
+                        4, 0.15D, 0.15D, 0.15D, 0.02D
+                );
+                oldTiny.discard();
+            }
         }
     }
 
@@ -193,8 +282,17 @@ public class SlimeFieldEntity extends Entity {
         if (tag.hasUUID("OwnerUUID")) {
             this.ownerUuid = tag.getUUID("OwnerUUID");
         }
+        if (tag.hasUUID("CasterKingUUID")) {
+            this.casterKingUuid = tag.getUUID("CasterKingUUID");
+        }
+        if (tag.contains("ModSlimeChance")) {
+            this.modSlimeChance = tag.getFloat("ModSlimeChance");
+        }
         if (tag.contains("MaxLifetime")) {
             this.setMaxLifetime(tag.getInt("MaxLifetime"));
+        }
+        if (tag.contains("SpawnCooldown")) {
+            this.spawnCooldown = tag.getInt("SpawnCooldown");
         }
     }
 
@@ -203,7 +301,12 @@ public class SlimeFieldEntity extends Entity {
         if (this.ownerUuid != null) {
             tag.putUUID("OwnerUUID", this.ownerUuid);
         }
+        if (this.casterKingUuid != null) {
+            tag.putUUID("CasterKingUUID", this.casterKingUuid);
+        }
+        tag.putFloat("ModSlimeChance", this.modSlimeChance);
         tag.putInt("MaxLifetime", this.getMaxLifetime());
+        tag.putInt("SpawnCooldown", this.spawnCooldown);
     }
 
     @Override
