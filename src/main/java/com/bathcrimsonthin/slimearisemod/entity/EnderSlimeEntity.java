@@ -789,6 +789,9 @@ public class EnderSlimeEntity extends Slime implements NeutralMob {
 
         @Override
         public boolean canUse() {
+            if (!com.bathcrimsonthin.slimearisemod.config.SlimeAriseConfig.get().behavior.allowEnderSlimeBlockGriefing) {
+                return false;
+            }
             if (this.slime.level().isDay()) {
                 return false;
             } else if (this.slime.getCarriedBlock() != null) {

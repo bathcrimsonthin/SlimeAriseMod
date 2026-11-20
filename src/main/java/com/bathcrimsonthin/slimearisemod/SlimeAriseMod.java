@@ -2,6 +2,7 @@ package com.bathcrimsonthin.slimearisemod;
 
 import com.bathcrimsonthin.slimearisemod.advancement.ModCriteriaTriggers;
 import com.bathcrimsonthin.slimearisemod.block.ModBlocks;
+import com.bathcrimsonthin.slimearisemod.config.SlimeAriseConfig;
 import com.bathcrimsonthin.slimearisemod.entity.ModEntities;
 import com.bathcrimsonthin.slimearisemod.entity.ModEntitySpawns;
 import com.bathcrimsonthin.slimearisemod.item.ModItemGroups;
@@ -35,6 +36,7 @@ public class SlimeAriseMod implements ModInitializer {
 
 	@Override
 	public void onInitialize() {
+		SlimeAriseConfig.load();
 		ModBlocks.registerModBlocks();
 		ModItems.registerModItems();
 		ModItemGroups.registerItemGroups();

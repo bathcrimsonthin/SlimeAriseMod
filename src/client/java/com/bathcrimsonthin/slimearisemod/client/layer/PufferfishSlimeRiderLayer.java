@@ -25,7 +25,8 @@ public class PufferfishSlimeRiderLayer extends RenderLayer<PufferfishSlimeEntity
     @Override
     public void render(PoseStack poseStack, MultiBufferSource bufferSource, int packedLight, PufferfishSlimeEntity entity,
                        float limbSwing, float limbSwingAmount, float partialTick, float ageInTicks, float netHeadYaw, float headPitch) {
-        if (!(entity.getFirstPassenger() instanceof Pufferfish pufferfish)) {
+        Pufferfish pufferfish = entity.getPassengerPufferfish();
+        if (pufferfish == null) {
             return;
         }
 

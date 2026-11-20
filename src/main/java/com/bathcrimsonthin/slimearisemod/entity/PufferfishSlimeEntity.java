@@ -36,10 +36,21 @@ public class PufferfishSlimeEntity extends Slime {
         return Monster.createMonsterAttributes();
     }
 
-    // 搭乗中のフグに操縦権を渡さず、スライム自身のAIで移動・ジャンプさせる
+    // 搭乗中のフグ・上段のスライムに操縦権を渡さず、スライム自身のAIで移動・ジャンプさせる
     @Nullable
     @Override
     public LivingEntity getControllingPassenger() {
+        return null;
+    }
+
+    // 上に別のスライムが積まれていても確実に内部のフグを取得する
+    @Nullable
+    public Pufferfish getPassengerPufferfish() {
+        for (Entity passenger : this.getPassengers()) {
+            if (passenger instanceof Pufferfish pufferfish) {
+                return pufferfish;
+            }
+        }
         return null;
     }
 
@@ -54,19 +65,20 @@ public class PufferfishSlimeEntity extends Slime {
                 Pufferfish pufferfish = EntityType.PUFFERFISH.create(this.level());
                 if (pufferfish != null) {
                     pufferfish.moveTo(this.getX(), this.getY(), this.getZ(), this.getYRot(), 0.0F);
+                    pufferfish.setPuffState(2);
                     this.level().addFreshEntity(pufferfish);
                     pufferfish.startRiding(this, true);
                 }
             }
 
-            // 搭乗中のフグの窒息防止および近接毒攻撃処理
-            if (this.getFirstPassenger() instanceof Pufferfish pufferfish) {
+            // 搭乗中のフグの窒息防止・最大膨張の維持・近接毒攻撃処理
+            Pufferfish pufferfish = this.getPassengerPufferfish();
+            if (pufferfish != null) {
                 pufferfish.setAirSupply(pufferfish.getMaxAirSupply());
-
-                int puffState = pufferfish.getPuffState();
-                if (puffState > 0) {
-                    this.applyPufferfishStingAround(pufferfish, puffState);
+                if (pufferfish.getPuffState() != 2) {
+                    pufferfish.setPuffState(2);
                 }
+                this.applyPufferfishStingAround(pufferfish, 2);
             }
         }
     }
@@ -81,6 +93,7 @@ public class PufferfishSlimeEntity extends Slime {
                 entity -> entity != this
                         && entity != pufferfish
                         && !(entity instanceof PufferfishSlimeEntity)
+                        && !ModEntitySpawns.isSameSlimeStack(this, entity)
                         && entity.isAlive()
                         && this.hasLineOfSight(entity)
         );
@@ -129,11 +142,14 @@ public class PufferfishSlimeEntity extends Slime {
         }
     }
 
-    // 搭乗位置をスライムの内部中央に設定
+    // フグのみスライムの内部中央に配置し、上に積まれる他スライムは他のスライムと同じ標準の騎乗位置にする
     @Override
     protected Vec3 getPassengerAttachmentPoint(Entity passenger, EntityDimensions dimensions, float partialTick) {
-        double yOffset = Math.max(0.05D, (dimensions.height() - passenger.getBbHeight()) * 0.5D);
-        return new Vec3(0.0D, yOffset, 0.0D);
+        if (passenger instanceof Pufferfish) {
+            double yOffset = Math.max(0.05D, (dimensions.height() - passenger.getBbHeight()) * 0.5D);
+            return new Vec3(0.0D, yOffset, 0.0D);
+        }
+        return super.getPassengerAttachmentPoint(passenger, dimensions, partialTick);
     }
 
     // 内部のフグからのダメージや毒を無効化
@@ -147,7 +163,7 @@ public class PufferfishSlimeEntity extends Slime {
 
     @Override
     public boolean canBeAffected(MobEffectInstance effect) {
-        if (effect.getEffect().equals(MobEffects.POISON) && this.getFirstPassenger() instanceof Pufferfish) {
+        if (effect.getEffect().equals(MobEffects.POISON) && this.getPassengerPufferfish() != null) {
             return false;
         }
         return super.canBeAffected(effect);

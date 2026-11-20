@@ -164,9 +164,9 @@ public class KingSlimeEntity extends Slime {
         return this.getHealth() < this.getMaxHealth() * 0.5F;
     }
 
-    // 通常形態かつ体力半分未満のときのみ飛翔体耐性が有効
+    // 体力半分以下のときは巨大化中も含めて飛翔体耐性が有効
     public boolean isProjectileImmune() {
-        return this.getKingState() == STATE_NORMAL && this.isBelowHalfHealth();
+        return this.isBelowHalfHealth();
     }
 
     @Nullable
@@ -246,17 +246,19 @@ public class KingSlimeEntity extends Slime {
         this.wasOnGroundLastTick = this.onGround();
     }
 
-    // 飛翔体耐性があることを示す回転バリアオーラ
+    // 飛翔体耐性があることを示す回転バリアオーラ（巨大化時はサイズに合わせて高さ・数を拡張）
     private void spawnProjectileShieldParticles(ServerLevel serverLevel) {
         if (this.tickCount % 2 != 0) {
             return;
         }
-        double radius = this.getBbWidth() * 0.75D;
+        double radius = this.getBbWidth() * 0.65D;
         double baseAngle = this.tickCount * 0.25D;
-        for (int i = 0; i < 2; i++) {
-            double angle = baseAngle + Math.PI * i;
+        int particleCount = this.isGiant() ? 8 : 2;
+        for (int i = 0; i < particleCount; i++) {
+            double angle = baseAngle + (Math.PI * 2.0D / particleCount) * i;
+            double heightRatio = 0.15D + ((this.tickCount + i * 3) % 10) * 0.075D;
             double px = this.getX() + Math.cos(angle) * radius;
-            double py = this.getY() + 0.25D + ((this.tickCount + i * 5) % 10) * 0.08D;
+            double py = this.getY() + this.getBbHeight() * heightRatio;
             double pz = this.getZ() + Math.sin(angle) * radius;
             serverLevel.sendParticles(ParticleTypes.ENCHANTED_HIT, px, py, pz, 1, 0.0D, 0.0D, 0.0D, 0.0D);
         }
@@ -555,7 +557,7 @@ public class KingSlimeEntity extends Slime {
 
     @Override
     public boolean hurt(DamageSource source, float amount) {
-        // 通常形態でHP半分以下の場合、飛翔体を弾き返して分かりやすくフィードバックする
+        // HP半分以下の場合（巨大化中も含む）、飛翔体を弾き返して分かりやすくフィードバックする
         if (this.isProjectileImmune()
                 && (source.is(DamageTypeTags.IS_PROJECTILE) || source.getDirectEntity() instanceof Projectile)) {
             Entity direct = source.getDirectEntity();

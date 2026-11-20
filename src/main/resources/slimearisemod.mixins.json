@@ -7,7 +7,6 @@
 		"AreaEffectCloudAccessor",
 		"ResultSlotMixin",
 		"PufferfishMixin",
-		"PufferfishMixin",
 		"SlimeAllyMixin",
 		"LivingEntityAllyProtectionMixin",
 		"ExplosionAllyMixin",
@@ -15,7 +14,10 @@
 		"LivingEntitySlamLockMixin",
 		"SlimeSpawnMixin",
 		"NetherFortressSpawnMixin",
-		"ResultSlotAdvancementMixin"
+		"ResultSlotAdvancementMixin",
+		"NaturalSpawnerAccessor",
+		"SlimeStackBehaviorMixin$MobStackMixin",
+		"SlimeStackBehaviorMixin$LivingEntityStackMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1

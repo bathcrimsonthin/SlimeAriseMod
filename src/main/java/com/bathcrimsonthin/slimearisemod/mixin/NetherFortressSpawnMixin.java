@@ -1,5 +1,6 @@
 package com.bathcrimsonthin.slimearisemod.mixin;
 
+import com.bathcrimsonthin.slimearisemod.config.SlimeAriseConfig;
 import com.bathcrimsonthin.slimearisemod.entity.ModEntities;
 import com.bathcrimsonthin.slimearisemod.entity.ModEntitySpawns;
 import net.minecraft.core.BlockPos;
@@ -42,10 +43,30 @@ public abstract class NetherFortressSpawnMixin {
                                                         @Nullable Holder<Biome> biome,
                                                         CallbackInfoReturnable<WeightedRandomList<MobSpawnSettings.SpawnerData>> cir) {
         if (category == MobCategory.MONSTER && cir.getReturnValue() == NetherFortressStructure.FORTRESS_ENEMIES) {
+            SlimeAriseConfig config = SlimeAriseConfig.get();
+            if (config.netherSpawnMode != SlimeAriseConfig.NetherSpawnMode.BIOME_AND_FORTRESS) {
+                return;
+            }
+
             if (slimearisemod$fortressEnemies == null) {
                 List<MobSpawnSettings.SpawnerData> entries = new ArrayList<>(NetherFortressStructure.FORTRESS_ENEMIES.unwrap());
-                entries.add(new MobSpawnSettings.SpawnerData(ModEntities.BLAZE_SLIME, ModEntitySpawns.scaleWeight(10), 2, 3));
-                entries.add(new MobSpawnSettings.SpawnerData(ModEntities.WITHER_SLIME, ModEntitySpawns.scaleWeight(10), 2, 4));
+
+                SlimeAriseConfig.SpawnEntry blazeFortress = config.netherBiomeAndFortress.blazeSlimeFortress;
+                int blazeWeight = ModEntitySpawns.scaleWeight(blazeFortress.weight);
+                if (blazeWeight > 0) {
+                    int min = Math.max(1, blazeFortress.minGroupSize);
+                    int max = Math.max(min, blazeFortress.maxGroupSize);
+                    entries.add(new MobSpawnSettings.SpawnerData(ModEntities.BLAZE_SLIME, blazeWeight, min, max));
+                }
+
+                SlimeAriseConfig.SpawnEntry witherFortress = config.netherBiomeAndFortress.witherSlimeFortress;
+                int witherWeight = ModEntitySpawns.scaleWeight(witherFortress.weight);
+                if (witherWeight > 0) {
+                    int min = Math.max(1, witherFortress.minGroupSize);
+                    int max = Math.max(min, witherFortress.maxGroupSize);
+                    entries.add(new MobSpawnSettings.SpawnerData(ModEntities.WITHER_SLIME, witherWeight, min, max));
+                }
+
                 slimearisemod$fortressEnemies = WeightedRandomList.create(entries);
             }
             cir.setReturnValue(slimearisemod$fortressEnemies);
