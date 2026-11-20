@@ -1,6 +1,7 @@
 package com.bathcrimsonthin.slimearisemod.mixin;
 
 import com.bathcrimsonthin.slimearisemod.entity.ModEntities;
+import com.bathcrimsonthin.slimearisemod.entity.ModEntitySpawns;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.server.level.ServerLevel;
@@ -43,8 +44,8 @@ public abstract class NetherFortressSpawnMixin {
         if (category == MobCategory.MONSTER && cir.getReturnValue() == NetherFortressStructure.FORTRESS_ENEMIES) {
             if (slimearisemod$fortressEnemies == null) {
                 List<MobSpawnSettings.SpawnerData> entries = new ArrayList<>(NetherFortressStructure.FORTRESS_ENEMIES.unwrap());
-                entries.add(new MobSpawnSettings.SpawnerData(ModEntities.BLAZE_SLIME, 10, 2, 3));
-                entries.add(new MobSpawnSettings.SpawnerData(ModEntities.WITHER_SLIME, 10, 2, 4));
+                entries.add(new MobSpawnSettings.SpawnerData(ModEntities.BLAZE_SLIME, ModEntitySpawns.scaleWeight(10), 2, 3));
+                entries.add(new MobSpawnSettings.SpawnerData(ModEntities.WITHER_SLIME, ModEntitySpawns.scaleWeight(10), 2, 4));
                 slimearisemod$fortressEnemies = WeightedRandomList.create(entries);
             }
             cir.setReturnValue(slimearisemod$fortressEnemies);

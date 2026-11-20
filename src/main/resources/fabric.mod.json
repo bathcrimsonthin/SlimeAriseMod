@@ -21,6 +21,9 @@
 		],
 		"client": [
 			"com.bathcrimsonthin.slimearisemod.client.SlimeAriseModClient"
+		],
+		"jei_mod_plugin": [
+			"com.bathcrimsonthin.slimearisemod.compat.SlimeAriseJeiPlugin"
 		]
 	},
 	"mixins": [

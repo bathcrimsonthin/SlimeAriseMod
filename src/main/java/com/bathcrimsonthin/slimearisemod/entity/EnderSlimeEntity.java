@@ -220,12 +220,12 @@ public class EnderSlimeEntity extends Slime implements NeutralMob {
                 this.teleportRandomly();
             }
 
-            // 直射日光回避テレポート（バニラエンダーマン準拠: 敵対後 MIN_DEAGGRESSION_TIME 経過後に発動）
+            // 直射日光回避テレポート（日陰・地下を優先して退避する）
             if (this.level().isDay() && this.tickCount >= this.targetChangeTime + MIN_DEAGGRESSION_TIME) {
                 float brightness = this.getLightLevelDependentMagicValue();
-                if (brightness > 0.5F && this.level().canSeeSky(this.blockPosition()) && this.random.nextFloat() * 30.0F < (brightness - 0.4F) * 2.0F) {
+                if (brightness > 0.5F && this.level().canSeeSky(this.blockPosition()) && this.random.nextFloat() * 15.0F < (brightness - 0.4F) * 2.0F) {
                     this.setTarget(null);
-                    this.teleportRandomly();
+                    this.teleportToShade();
                 }
             }
 
@@ -298,6 +298,43 @@ public class EnderSlimeEntity extends Slime implements NeutralMob {
         ItemStack itemStack = thrownPotion.getItem();
         PotionContents potionContents = itemStack.getOrDefault(DataComponents.POTION_CONTENTS, PotionContents.EMPTY);
         return potionContents.is(Potions.WATER) && super.hurt(source, amount);
+    }
+
+    public boolean teleportToShade() {
+        if (!this.level().isClientSide() && this.isAlive()) {
+            // 最大16回試行し、空が見えない場所（洞窟・木陰・屋根の下）を優先してテレポートする
+            for (int i = 0; i < 16; ++i) {
+                double x = this.getX() + (this.random.nextDouble() - 0.5D) * 64.0D;
+                // 地下洞窟へ入りやすいよう、下方向（-40 〜 +16）にバイアスをかける
+                double y = this.getY() + (double) (this.random.nextInt(56) - 40);
+                double z = this.getZ() + (this.random.nextDouble() - 0.5D) * 64.0D;
+                if (this.teleportIfShaded(x, y, z)) {
+                    return true;
+                }
+            }
+            // 周囲に日陰や洞窟が見つからない場合（開けた平原・砂漠など）は通常のランダムテレポートを行う
+            return this.teleportRandomly();
+        }
+        return false;
+    }
+
+    private boolean teleportIfShaded(double x, double y, double z) {
+        BlockPos.MutableBlockPos mutablePos = new BlockPos.MutableBlockPos(x, y, z);
+        while (mutablePos.getY() > this.level().getMinBuildHeight() && !this.level().getBlockState(mutablePos).blocksMotion()) {
+            mutablePos.move(Direction.DOWN);
+        }
+
+        BlockState state = this.level().getBlockState(mutablePos);
+        boolean blocksMotion = state.blocksMotion();
+        boolean isWater = state.getFluidState().is(FluidTags.WATER);
+
+        if (blocksMotion && !isWater) {
+            BlockPos landingPos = mutablePos.above();
+            if (!this.level().canSeeSky(landingPos)) {
+                return this.teleport(x, landingPos.getY(), z);
+            }
+        }
+        return false;
     }
 
     public boolean teleportRandomly() {
@@ -752,7 +789,9 @@ public class EnderSlimeEntity extends Slime implements NeutralMob {
 
         @Override
         public boolean canUse() {
-            if (this.slime.getCarriedBlock() != null) {
+            if (this.slime.level().isDay()) {
+                return false;
+            } else if (this.slime.getCarriedBlock() != null) {
                 return false;
             } else if (!this.slime.level().getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING)) {
                 return false;

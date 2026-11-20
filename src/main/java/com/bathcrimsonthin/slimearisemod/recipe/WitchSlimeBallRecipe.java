@@ -26,7 +26,7 @@ public class WitchSlimeBallRecipe extends CustomRecipe {
 
     public static final String RANDOM_POTION_TAG = "slimearisemod:random_witch_potion";
 
-    private static final List<Holder<MobEffect>> WITCH_EFFECTS = List.of(
+    public static final List<Holder<MobEffect>> WITCH_EFFECTS = List.of(
             MobEffects.WATER_BREATHING,
             MobEffects.FIRE_RESISTANCE,
             MobEffects.REGENERATION,
@@ -71,14 +71,24 @@ public class WitchSlimeBallRecipe extends CustomRecipe {
 
     @Override
     public ItemStack assemble(CraftingInput input, HolderLookup.Provider registries) {
-        // 作業台プレビュー時点では効果を付与せず、識別タグ付きの未確定残留ポーションを返す
         ItemStack result = new ItemStack(Items.LINGERING_POTION);
         result.set(DataComponents.ITEM_NAME, Component.translatable("item.slimearisemod.mystery_lingering_potion"));
         CustomData.update(DataComponents.CUSTOM_DATA, result, tag -> tag.putBoolean(RANDOM_POTION_TAG, true));
         return result;
     }
 
-    // 実際に作業台から取り出された瞬間にランダムな効果（残留ポーションで60秒 = 4800 ticks）へ確定させる
+    public static ItemStack createLingeringPotionForEffect(Holder<MobEffect> effect) {
+        ItemStack potion = new ItemStack(Items.LINGERING_POTION);
+        MobEffectInstance effectInstance = new MobEffectInstance(effect, 1200, 0);
+        PotionContents contents = new PotionContents(
+                Optional.empty(),
+                Optional.of(effect.value().getColor()),
+                List.of(effectInstance)
+        );
+        potion.set(DataComponents.POTION_CONTENTS, contents);
+        return potion;
+    }
+
     public static void resolveRandomPotion(ItemStack stack, RandomSource random) {
         if (stack.isEmpty() || !stack.is(Items.LINGERING_POTION)) {
             return;
@@ -93,7 +103,6 @@ public class WitchSlimeBallRecipe extends CustomRecipe {
         stack.remove(DataComponents.ITEM_NAME);
 
         Holder<MobEffect> selectedEffect = WITCH_EFFECTS.get(random.nextInt(WITCH_EFFECTS.size()));
-        // 残留ポーションは効果時間が1/4になるため、60秒(1200 ticks)にするには4倍の4800 ticksを指定する
         MobEffectInstance effectInstance = new MobEffectInstance(selectedEffect, 1200, 0);
 
         PotionContents contents = new PotionContents(

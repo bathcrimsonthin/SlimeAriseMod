@@ -42,7 +42,7 @@
       ]
     },
     {
-      "comment": "2. ウサギの皮 (0~1個 + Looting毎に0~1個追加)",
+      "comment": "2. ウサギの皮 (35%で1個 + Looting毎に0~1個追加)",
       "rolls": 1.0,
       "bonus_rolls": 0.0,
       "conditions": [
@@ -52,6 +52,10 @@
           "predicate": {
             "nbt": "{Size:0}"
           }
+        },
+        {
+          "condition": "minecraft:random_chance",
+          "chance": 0.35
         }
       ],
       "entries": [
@@ -61,11 +65,7 @@
           "functions": [
             {
               "function": "minecraft:set_count",
-              "count": {
-                "type": "minecraft:uniform",
-                "min": 0.0,
-                "max": 1.0
-              },
+              "count": 1.0,
               "add": false
             },
             {
@@ -82,7 +82,7 @@
       ]
     },
     {
-      "comment": "3. ウサギ肉 (1個 + Looting毎に0~1個追加 / 炎上死の場合は焼きウサギ肉に変換)",
+      "comment": "3. ウサギ肉 (40%で1個 + Looting毎に0~1個追加 / 炎上死の場合は焼きウサギ肉に変換)",
       "rolls": 1.0,
       "bonus_rolls": 0.0,
       "conditions": [
@@ -92,6 +92,10 @@
           "predicate": {
             "nbt": "{Size:0}"
           }
+        },
+        {
+          "condition": "minecraft:random_chance",
+          "chance": 0.4
         }
       ],
       "entries": [
@@ -101,11 +105,7 @@
           "functions": [
             {
               "function": "minecraft:set_count",
-              "count": {
-                "type": "minecraft:uniform",
-                "min": 1.0,
-                "max": 1.0
-              },
+              "count": 1.0,
               "add": false
             },
             {
@@ -136,7 +136,7 @@
       ]
     },
     {
-      "comment": "4. ウサギの足 (1.21最新構文: プレイヤー撃破時 10% / Looting Iで13%, 以降+3%)",
+      "comment": "4. ウサギの足 (プレイヤー撃破時 3% / Looting Iで4%, 以降+1%)",
       "rolls": 1.0,
       "bonus_rolls": 0.0,
       "conditions": [
@@ -153,11 +153,11 @@
         {
           "condition": "minecraft:random_chance_with_enchanted_bonus",
           "enchantment": "minecraft:looting",
-          "unenchanted_chance": 0.1,
+          "unenchanted_chance": 0.03,
           "enchanted_chance": {
             "type": "minecraft:linear",
-            "base": 0.13,
-            "per_level_above_first": 0.03
+            "base": 0.04,
+            "per_level_above_first": 0.01
           }
         }
       ],

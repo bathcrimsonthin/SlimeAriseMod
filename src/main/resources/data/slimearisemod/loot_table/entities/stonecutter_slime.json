@@ -2,6 +2,7 @@
   "type": "minecraft:entity",
   "pools": [
     {
+      "comment": "1. スライムボール (0~2個 + Looting)",
       "bonus_rolls": 0.0,
       "conditions": [
         {
@@ -15,6 +16,7 @@
       "entries": [
         {
           "type": "minecraft:item",
+          "name": "minecraft:slime_ball",
           "functions": [
             {
               "add": false,
@@ -34,13 +36,13 @@
               "enchantment": "minecraft:looting",
               "function": "minecraft:enchanted_count_increase"
             }
-          ],
-          "name": "minecraft:slime_ball"
+          ]
         }
       ],
       "rolls": 1.0
     },
     {
+      "comment": "2-A. 基本石材 [Y > 0]: 精錬済みの石 (1~2個 + Looting)",
       "bonus_rolls": 0.0,
       "conditions": [
         {
@@ -49,69 +51,321 @@
           "predicate": {
             "nbt": "{Size:0}"
           }
+        },
+        {
+          "condition": "minecraft:inverted",
+          "term": {
+            "condition": "minecraft:location_check",
+            "predicate": {
+              "position": {
+                "y": {
+                  "max": 0.0
+                }
+              }
+            }
+          }
         }
       ],
       "entries": [
         {
           "type": "minecraft:item",
-          "name": "minecraft:stone"
-        },
-        {
-          "type": "minecraft:item",
-          "name": "minecraft:cobblestone"
-        },
-        {
-          "type": "minecraft:item",
-          "name": "minecraft:andesite"
-        },
-        {
-          "type": "minecraft:item",
-          "name": "minecraft:diorite"
-        },
-        {
-          "type": "minecraft:item",
-          "name": "minecraft:granite"
-        },
-        {
-          "type": "minecraft:item",
-          "name": "minecraft:cobbled_deepslate"
-        },
-        {
-          "type": "minecraft:item",
-          "name": "minecraft:tuff"
-        },
-        {
-          "type": "minecraft:item",
-          "name": "minecraft:blackstone"
-        },
-        {
-          "type": "minecraft:item",
-          "name": "minecraft:sandstone"
-        }
-      ],
-      "functions": [
-        {
-          "add": false,
-          "count": {
-            "type": "minecraft:uniform",
-            "max": 2.0,
-            "min": 1.0
-          },
-          "function": "minecraft:set_count"
-        },
-        {
-          "count": {
-            "type": "minecraft:uniform",
-            "max": 1.0,
-            "min": 0.0
-          },
-          "enchantment": "minecraft:looting",
-          "function": "minecraft:enchanted_count_increase"
+          "name": "minecraft:stone",
+          "functions": [
+            {
+              "add": false,
+              "count": {
+                "type": "minecraft:uniform",
+                "max": 2.0,
+                "min": 1.0
+              },
+              "function": "minecraft:set_count"
+            },
+            {
+              "count": {
+                "type": "minecraft:uniform",
+                "max": 1.0,
+                "min": 0.0
+              },
+              "enchantment": "minecraft:looting",
+              "function": "minecraft:enchanted_count_increase"
+            }
+          ]
         }
       ],
       "rolls": 1.0
     },
     {
+      "comment": "2-B. 基本石材 [Y <= 0]: 通常の深層岩 (1~2個 + Looting)",
+      "bonus_rolls": 0.0,
+      "conditions": [
+        {
+          "condition": "minecraft:entity_properties",
+          "entity": "this",
+          "predicate": {
+            "nbt": "{Size:0}"
+          }
+        },
+        {
+          "condition": "minecraft:location_check",
+          "predicate": {
+            "position": {
+              "y": {
+                "max": 0.0
+              }
+            }
+          }
+        }
+      ],
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:deepslate",
+          "functions": [
+            {
+              "add": false,
+              "count": {
+                "type": "minecraft:uniform",
+                "max": 2.0,
+                "min": 1.0
+              },
+              "function": "minecraft:set_count"
+            },
+            {
+              "count": {
+                "type": "minecraft:uniform",
+                "max": 1.0,
+                "min": 0.0
+              },
+              "enchantment": "minecraft:looting",
+              "function": "minecraft:enchanted_count_increase"
+            }
+          ]
+        }
+      ],
+      "rolls": 1.0
+    },
+    {
+      "comment": "3-A. 掘り出し鉱石ブロック [Y > 0] (プレイヤー撃破時 12% / Looting Iで15%, 以降+3%)",
+      "bonus_rolls": 0.0,
+      "conditions": [
+        {
+          "condition": "minecraft:entity_properties",
+          "entity": "this",
+          "predicate": {
+            "nbt": "{Size:0}"
+          }
+        },
+        {
+          "condition": "minecraft:killed_by_player"
+        },
+        {
+          "condition": "minecraft:inverted",
+          "term": {
+            "condition": "minecraft:location_check",
+            "predicate": {
+              "position": {
+                "y": {
+                  "max": 0.0
+                }
+              }
+            }
+          }
+        },
+        {
+          "condition": "minecraft:random_chance_with_enchanted_bonus",
+          "enchanted_chance": {
+            "type": "minecraft:linear",
+            "base": 0.15,
+            "per_level_above_first": 0.03
+          },
+          "enchantment": "minecraft:looting",
+          "unenchanted_chance": 0.12
+        }
+      ],
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:coal_ore",
+          "weight": 25
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:copper_ore",
+          "weight": 20
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:iron_ore",
+          "weight": 22
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:redstone_ore",
+          "weight": 12
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:lapis_ore",
+          "weight": 10
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:gold_ore",
+          "weight": 8
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:emerald_ore",
+          "weight": 2
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:diamond_ore",
+          "weight": 1
+        }
+      ],
+      "rolls": 1.0
+    },
+    {
+      "comment": "3-B. 掘り出し深層鉱石ブロック [Y <= 0] (プレイヤー撃破時 12% / Looting Iで15%, 以降+3%)",
+      "bonus_rolls": 0.0,
+      "conditions": [
+        {
+          "condition": "minecraft:entity_properties",
+          "entity": "this",
+          "predicate": {
+            "nbt": "{Size:0}"
+          }
+        },
+        {
+          "condition": "minecraft:killed_by_player"
+        },
+        {
+          "condition": "minecraft:location_check",
+          "predicate": {
+            "position": {
+              "y": {
+                "max": 0.0
+              }
+            }
+          }
+        },
+        {
+          "condition": "minecraft:random_chance_with_enchanted_bonus",
+          "enchanted_chance": {
+            "type": "minecraft:linear",
+            "base": 0.15,
+            "per_level_above_first": 0.03
+          },
+          "enchantment": "minecraft:looting",
+          "unenchanted_chance": 0.12
+        }
+      ],
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:deepslate_coal_ore",
+          "weight": 10
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:deepslate_copper_ore",
+          "weight": 15
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:deepslate_iron_ore",
+          "weight": 25
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:deepslate_redstone_ore",
+          "weight": 16
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:deepslate_lapis_ore",
+          "weight": 14
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:deepslate_gold_ore",
+          "weight": 14
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:deepslate_emerald_ore",
+          "weight": 2
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:deepslate_diamond_ore",
+          "weight": 4
+        }
+      ],
+      "rolls": 1.0
+    },
+    {
+      "comment": "4. 回転鋸のパーツ：鉄塊 2~5個 または 鉄インゴット 1個 (プレイヤー撃破時 15% / Looting Iで19%, 以降+4%)",
+      "bonus_rolls": 0.0,
+      "conditions": [
+        {
+          "condition": "minecraft:entity_properties",
+          "entity": "this",
+          "predicate": {
+            "nbt": "{Size:0}"
+          }
+        },
+        {
+          "condition": "minecraft:killed_by_player"
+        },
+        {
+          "condition": "minecraft:random_chance_with_enchanted_bonus",
+          "enchanted_chance": {
+            "type": "minecraft:linear",
+            "base": 0.19,
+            "per_level_above_first": 0.04
+          },
+          "enchantment": "minecraft:looting",
+          "unenchanted_chance": 0.15
+        }
+      ],
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:iron_nugget",
+          "weight": 75,
+          "functions": [
+            {
+              "add": false,
+              "count": {
+                "type": "minecraft:uniform",
+                "max": 5.0,
+                "min": 2.0
+              },
+              "function": "minecraft:set_count"
+            },
+            {
+              "count": {
+                "type": "minecraft:uniform",
+                "max": 2.0,
+                "min": 0.0
+              },
+              "enchantment": "minecraft:looting",
+              "function": "minecraft:enchanted_count_increase"
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:iron_ingot",
+          "weight": 25
+        }
+      ],
+      "rolls": 1.0
+    },
+    {
+      "comment": "5. 石切台 (5% / Looting Iで8%, 以降+3%)",
       "bonus_rolls": 0.0,
       "conditions": [
         {

@@ -22,6 +22,9 @@ import java.util.function.Predicate;
 
 public final class ModEntitySpawns {
 
+    // 全体のスポーン重み倍率（微調整したい場合はこの値のみ変更）
+    public static final double SPAWN_WEIGHT_SCALE = 0.50D;
+
     private static final int OVERWORLD_MOD_SLIME_WEIGHT = 60;
     private static final int OVERWORLD_MOD_SLIME_MIN_COUNT = 4;
     private static final int OVERWORLD_MOD_SLIME_MAX_COUNT = 4;
@@ -35,6 +38,16 @@ public final class ModEntitySpawns {
     private static final int END_ENDER_SLIME_WEIGHT = 10;
 
     private ModEntitySpawns() {
+    }
+
+    /**
+     * 基準となるスポーン重みに全体スケールを適用する（元が1以上の場合は最低1を保証）
+     */
+    public static int scaleWeight(int baseWeight) {
+        if (baseWeight <= 0) {
+            return 0;
+        }
+        return Math.max(1, (int) Math.round(baseWeight * SPAWN_WEIGHT_SCALE));
     }
 
     /**
@@ -75,37 +88,39 @@ public final class ModEntitySpawns {
         Predicate<BiomeSelectionContext> overworldBiomes = BiomeSelectors.foundInOverworld()
                 .and(BiomeSelectors.excludeByKey(Biomes.MUSHROOM_FIELDS, Biomes.DEEP_DARK));
 
-        BiomeModifications.addSpawn(overworldBiomes, MobCategory.MONSTER,
-                ModEntities.WITCH_SLIME, OVERWORLD_MOD_SLIME_WEIGHT, OVERWORLD_MOD_SLIME_MIN_COUNT, OVERWORLD_MOD_SLIME_MAX_COUNT);
+        int overworldWeight = scaleWeight(OVERWORLD_MOD_SLIME_WEIGHT);
 
         BiomeModifications.addSpawn(overworldBiomes, MobCategory.MONSTER,
-                ModEntities.STONECUTTER_SLIME, OVERWORLD_MOD_SLIME_WEIGHT, OVERWORLD_MOD_SLIME_MIN_COUNT, OVERWORLD_MOD_SLIME_MAX_COUNT);
+                ModEntities.WITCH_SLIME, overworldWeight, OVERWORLD_MOD_SLIME_MIN_COUNT, OVERWORLD_MOD_SLIME_MAX_COUNT);
 
         BiomeModifications.addSpawn(overworldBiomes, MobCategory.MONSTER,
-                ModEntities.PUFFERFISH_SLIME, OVERWORLD_MOD_SLIME_WEIGHT, OVERWORLD_MOD_SLIME_MIN_COUNT, OVERWORLD_MOD_SLIME_MAX_COUNT);
+                ModEntities.STONECUTTER_SLIME, overworldWeight, OVERWORLD_MOD_SLIME_MIN_COUNT, OVERWORLD_MOD_SLIME_MAX_COUNT);
 
         BiomeModifications.addSpawn(overworldBiomes, MobCategory.MONSTER,
-                ModEntities.RABBIT_SLIME, OVERWORLD_MOD_SLIME_WEIGHT, OVERWORLD_MOD_SLIME_MIN_COUNT, OVERWORLD_MOD_SLIME_MAX_COUNT);
+                ModEntities.PUFFERFISH_SLIME, overworldWeight, OVERWORLD_MOD_SLIME_MIN_COUNT, OVERWORLD_MOD_SLIME_MAX_COUNT);
 
         BiomeModifications.addSpawn(overworldBiomes, MobCategory.MONSTER,
-                ModEntities.BOMB_SLIME, OVERWORLD_MOD_SLIME_WEIGHT, OVERWORLD_MOD_SLIME_MIN_COUNT, OVERWORLD_MOD_SLIME_MAX_COUNT);
+                ModEntities.RABBIT_SLIME, overworldWeight, OVERWORLD_MOD_SLIME_MIN_COUNT, OVERWORLD_MOD_SLIME_MAX_COUNT);
+
+        BiomeModifications.addSpawn(overworldBiomes, MobCategory.MONSTER,
+                ModEntities.BOMB_SLIME, overworldWeight, OVERWORLD_MOD_SLIME_MIN_COUNT, OVERWORLD_MOD_SLIME_MAX_COUNT);
 
         BiomeModifications.addSpawn(BiomeSelectors.includeByKey(Biomes.NETHER_WASTES), MobCategory.MONSTER,
-                ModEntities.BLAZE_SLIME, NETHER_WASTES_BLAZE_WEIGHT, 2, 3);
+                ModEntities.BLAZE_SLIME, scaleWeight(NETHER_WASTES_BLAZE_WEIGHT), 2, 3);
         BiomeModifications.addSpawn(BiomeSelectors.includeByKey(Biomes.BASALT_DELTAS), MobCategory.MONSTER,
-                ModEntities.BLAZE_SLIME, BASALT_DELTAS_BLAZE_WEIGHT, 2, 3);
+                ModEntities.BLAZE_SLIME, scaleWeight(BASALT_DELTAS_BLAZE_WEIGHT), 2, 3);
         BiomeModifications.addSpawn(BiomeSelectors.includeByKey(Biomes.CRIMSON_FOREST), MobCategory.MONSTER,
-                ModEntities.BLAZE_SLIME, CRIMSON_FOREST_BLAZE_WEIGHT, 2, 3);
+                ModEntities.BLAZE_SLIME, scaleWeight(CRIMSON_FOREST_BLAZE_WEIGHT), 2, 3);
 
         BiomeModifications.addSpawn(BiomeSelectors.includeByKey(Biomes.SOUL_SAND_VALLEY), MobCategory.MONSTER,
-                ModEntities.WITHER_SLIME, SOUL_SAND_VALLEY_WITHER_WEIGHT, 2, 4);
+                ModEntities.WITHER_SLIME, scaleWeight(SOUL_SAND_VALLEY_WITHER_WEIGHT), 2, 4);
 
         BiomeModifications.addSpawn(overworldBiomes, MobCategory.MONSTER,
-                ModEntities.ENDER_SLIME, OVERWORLD_MOD_SLIME_WEIGHT, OVERWORLD_MOD_SLIME_MIN_COUNT, OVERWORLD_MOD_SLIME_MAX_COUNT);
+                ModEntities.ENDER_SLIME, overworldWeight, OVERWORLD_MOD_SLIME_MIN_COUNT, OVERWORLD_MOD_SLIME_MAX_COUNT);
         BiomeModifications.addSpawn(BiomeSelectors.includeByKey(Biomes.WARPED_FOREST), MobCategory.MONSTER,
-                ModEntities.ENDER_SLIME, WARPED_FOREST_ENDER_WEIGHT, 4, 4);
+                ModEntities.ENDER_SLIME, scaleWeight(WARPED_FOREST_ENDER_WEIGHT), 4, 4);
         BiomeModifications.addSpawn(BiomeSelectors.foundInTheEnd(), MobCategory.MONSTER,
-                ModEntities.ENDER_SLIME, END_ENDER_SLIME_WEIGHT, 4, 4);
+                ModEntities.ENDER_SLIME, scaleWeight(END_ENDER_SLIME_WEIGHT), 4, 4);
     }
 
     private static <T extends Slime> void registerDarkSpawnPlacement(EntityType<T> entityType) {

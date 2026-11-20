@@ -1,8 +1,8 @@
 {
   "item.slimearisemod.blaze_slime_ball": "ブレイズスライムボール",
-  "item.slimearisemod.dummy_bomb_slime_ball": "ボムスライムボール(ダミー)",
+  "item.slimearisemod.dummy_bomb_slime_ball": "ボムスライムボール",
   "item.slimearisemod.witch_slime_ball": "ウィッチスライムボール",
-  "item.slimearisemod.ender_slime_ball": "エンダースライムボール(ダミー)",
+  "item.slimearisemod.ender_slime_ball": "エンダースライムボール",
   "item.slimearisemod.wither_slime_ball": "ウィザースライムボール",
 
   "item.slimearisemod.slimy_crown": "ぬるぬるした王冠",
@@ -64,7 +64,7 @@
   "entity.slimearisemod.stonecutter_slime": "石切り台スライム",
   "entity.slimearisemod.wither_slime": "ウィザースライム",
   "entity.slimearisemod.king_slime": "キングスライム",
-  "entity.slimearisemod.king_slime.giant_armor": "キングスライム - 巨大アーマー",
+  "entity.slimearisemod.king_slime.giant_armor": "キングスライム - ギガントアーマー",
   "entity.slimearisemod.slime_field": "スライムフィールド",
 
   "advancements.slimearisemod.root.title": "Slime Arise",
