@@ -17,7 +17,8 @@
 		"ResultSlotAdvancementMixin",
 		"NaturalSpawnerAccessor",
 		"SlimeStackBehaviorMixin$MobStackMixin",
-		"SlimeStackBehaviorMixin$LivingEntityStackMixin"
+		"SlimeStackBehaviorMixin$LivingEntityStackMixin",
+		"MobAllyTargetMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1

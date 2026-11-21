@@ -17,6 +17,7 @@ import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.animal.Pufferfish;
 import net.minecraft.world.entity.monster.Creeper;
+import net.minecraft.world.entity.monster.Enemy;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.monster.Slime;
 import net.minecraft.world.entity.player.Player;
@@ -94,13 +95,16 @@ public class PufferfishSlimeEntity extends Slime {
         double stingReach = 0.25D + 0.20D * this.getSize() + 0.10D * puffState;
         SlimeAriseConfig.PufferfishSlimeAttackMode attackMode =
                 SlimeAriseConfig.get().behavior.pufferfishSlimeAttackMode;
+        boolean isAllied = AlliedSlimeHelper.isAlliedSlime(this);
 
         List<LivingEntity> targets = this.level().getEntitiesOfClass(
                 LivingEntity.class,
                 this.getBoundingBox().inflate(stingReach),
                 entity -> entity != this
                         && entity != pufferfish
+                        && !(entity instanceof Pufferfish)
                         && !(entity instanceof PufferfishSlimeEntity)
+                        && !AlliedSlimeHelper.shouldProtectTarget(this, entity)
                         && !ModEntitySpawns.isSameSlimeStack(this, entity)
                         && entity.isAlive()
                         && this.hasLineOfSight(entity)
@@ -108,6 +112,9 @@ public class PufferfishSlimeEntity extends Slime {
 
         for (LivingEntity target : targets) {
             if (target instanceof Player player) {
+                if (isAllied) {
+                    continue;
+                }
                 if (!player.isCreative() && !player.isSpectator() && !player.isInvulnerable()) {
                     if (player.hurt(this.damageSources().mobAttack(pufferfish), (float) (1 + puffState))) {
                         if (player instanceof ServerPlayer serverPlayer && !pufferfish.isSilent()) {
@@ -116,7 +123,7 @@ public class PufferfishSlimeEntity extends Slime {
                         player.addEffect(new MobEffectInstance(MobEffects.POISON, 60 * puffState, 0), pufferfish);
                     }
                 }
-            } else if (target instanceof Mob mob && this.canAttackMob(mob, attackMode)) {
+            } else if (target instanceof Mob mob && this.canAttackMob(mob, attackMode, isAllied)) {
                 if (mob.hurt(this.damageSources().mobAttack(pufferfish), (float) (1 + puffState))) {
                     mob.addEffect(new MobEffectInstance(MobEffects.POISON, 60 * puffState, 0), pufferfish);
                     pufferfish.playSound(SoundEvents.PUFFER_FISH_STING, 1.0F, 1.0F);
@@ -125,9 +132,14 @@ public class PufferfishSlimeEntity extends Slime {
         }
     }
 
-    private boolean canAttackMob(Mob mob, SlimeAriseConfig.PufferfishSlimeAttackMode attackMode) {
+    private boolean canAttackMob(Mob mob, SlimeAriseConfig.PufferfishSlimeAttackMode attackMode, boolean isAllied) {
         if (mob.getType().is(EntityTypeTags.AQUATIC)) {
             return false;
+        }
+        if (isAllied) {
+            if (AlliedSlimeHelper.isAlliedSlime(mob) || !(mob instanceof Enemy)) {
+                return false;
+            }
         }
         return switch (attackMode) {
             case INDISCRIMINATE -> true;

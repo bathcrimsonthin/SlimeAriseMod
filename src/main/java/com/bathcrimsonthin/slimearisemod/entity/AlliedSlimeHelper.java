@@ -3,6 +3,7 @@ package com.bathcrimsonthin.slimearisemod.entity;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.OwnableEntity;
 import net.minecraft.world.entity.monster.Enemy;
 import net.minecraft.world.entity.monster.Slime;
 import net.minecraft.world.entity.player.Player;
@@ -14,7 +15,7 @@ import java.util.UUID;
 
 public final class AlliedSlimeHelper {
 
-    public static final int ALLY_MAX_LIFETIME_TICKS = 360; // 18秒後に弾けて消滅
+    public static final int ALLY_MAX_LIFETIME_TICKS = 600; // 30秒後に弾けて消滅（18秒から延長）
     public static final int SIZE_MEDIUM = 2;
     public static final int SIZE_LARGE = 4;
 
@@ -31,7 +32,14 @@ public final class AlliedSlimeHelper {
     @Nullable
     public static UUID getOwnerUuid(Entity entity) {
         if (entity instanceof AlliedSlimeAccess access) {
-            return access.slimearisemod$getAllyOwnerUuid();
+            UUID owner = access.slimearisemod$getAllyOwnerUuid();
+            if (owner != null) {
+                return owner;
+            }
+        }
+        Entity vehicle = entity.getVehicle();
+        if (vehicle instanceof AlliedSlimeAccess vehicleAccess) {
+            return vehicleAccess.slimearisemod$getAllyOwnerUuid();
         }
         return null;
     }
@@ -57,6 +65,9 @@ public final class AlliedSlimeHelper {
             return false;
         }
         if (victim.getUUID().equals(owner)) {
+            return true;
+        }
+        if (victim instanceof OwnableEntity ownable && owner.equals(ownable.getOwnerUUID())) {
             return true;
         }
         return areSameAlliance(attackerSlime, victim);
@@ -91,7 +102,7 @@ public final class AlliedSlimeHelper {
         }
 
         LivingEntity currentTarget = slime.getTarget();
-        if (currentTarget != null && (!currentTarget.isAlive() || shouldProtectTarget(slime, currentTarget))) {
+        if (currentTarget != null && (!currentTarget.isAlive() || currentTarget instanceof Player || shouldProtectTarget(slime, currentTarget))) {
             slime.setTarget(null);
             currentTarget = null;
         }

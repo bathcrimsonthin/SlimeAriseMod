@@ -70,6 +70,11 @@ public abstract class SlimeAllyMixin implements AlliedSlimeHelper.AlliedSlimeAcc
             return;
         }
 
+        LivingEntity currentTarget = self.getTarget();
+        if (currentTarget != null && (currentTarget instanceof Player || AlliedSlimeHelper.shouldProtectTarget(self, currentTarget))) {
+            self.setTarget(null);
+        }
+
         this.slimearisemod$allyLifeTicks++;
         if (this.slimearisemod$allyLifeTicks >= AlliedSlimeHelper.ALLY_MAX_LIFETIME_TICKS) {
             if (self.level() instanceof ServerLevel serverLevel) {
@@ -98,7 +103,7 @@ public abstract class SlimeAllyMixin implements AlliedSlimeHelper.AlliedSlimeAcc
             return;
         }
 
-        if (self.tickCount % 5 == 0) {
+        if (self.tickCount <= 1 || self.tickCount % 5 == 0) {
             AlliedSlimeHelper.updateAlliedTarget(self, this.slimearisemod$allyOwnerUuid);
         }
 

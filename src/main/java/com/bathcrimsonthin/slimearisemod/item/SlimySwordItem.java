@@ -42,7 +42,7 @@ public class SlimySwordItem extends SwordItem {
 
     private static final int DOMAIN_COOLDOWN_TICKS = 300; // 15秒
     private static final int DOMAIN_DURABILITY_COST = 20;
-    private static final int DOMAIN_FIELD_LIFETIME = 300; // 15秒
+    private static final int DOMAIN_FIELD_LIFETIME = 500; // 25秒（15秒から延長）
 
     public static final Tier SLIMY_TIER = new Tier() {
         @Override
@@ -146,17 +146,17 @@ public class SlimySwordItem extends SwordItem {
         double centerZ = player.getZ() + look.z * 0.65D;
         double groundY = findGroundY(serverLevel, centerX, player.getY(), centerZ);
 
-        // ① 放射状にスライムフィールドを展開（中央1枚 ＋ 周囲最大3枚）
+        // ① 広範囲にスライムフィールドを展開（中央1枚 ＋ 外周6方向へ最大6枚 ＝ 計最大7枚）
         int deployedFields = 0;
         if (tryDeployOwnedField(serverLevel, centerX, groundY, centerZ, ownerUuid)) {
             deployedFields++;
         }
 
-        int radialDirections = 5;
+        int radialDirections = 6;
         double baseAngle = serverLevel.random.nextDouble() * Math.PI * 2.0D;
-        double ringRadius = 4.6D;
+        double ringRadius = 5.4D;
 
-        for (int i = 0; i < radialDirections && deployedFields < 4; i++) {
+        for (int i = 0; i < radialDirections && deployedFields < 7; i++) {
             double angle = baseAngle + (Math.PI * 2.0D / radialDirections) * i;
             double fx = centerX + Math.cos(angle) * ringRadius;
             double fz = centerZ + Math.sin(angle) * ringRadius;
@@ -167,7 +167,7 @@ public class SlimySwordItem extends SwordItem {
             }
         }
 
-        // 味方スライムを4体召喚（1/2バニラ・1/2レアスライム、大サイズと中サイズをミックス）
+        // ② 味方スライムを4体召喚（1/2バニラ・1/2レアスライム、大サイズと中サイズをミックス）
         int initialSummonCount = 4;
         for (int i = 0; i < initialSummonCount; i++) {
             double angle = (Math.PI * 2.0D / initialSummonCount) * i + 0.4D;
@@ -206,15 +206,15 @@ public class SlimySwordItem extends SwordItem {
                 centerX,
                 groundY + 0.1D,
                 centerZ,
-                28,
-                0.45D,
+                32,
+                0.5D,
                 0.25D,
-                0.45D,
+                0.5D,
                 0.2D
         );
 
-        // 放射状衝撃波パーティクル
-        for (int ring = 1; ring <= 3; ring++) {
+        // 拡大したフィールド範囲に合わせた放射状衝撃波パーティクル（4重リング）
+        for (int ring = 1; ring <= 4; ring++) {
             double r = ring * 1.8D;
             int points = ring * 18;
             for (int p = 0; p < points; p++) {
@@ -225,7 +225,7 @@ public class SlimySwordItem extends SwordItem {
                 if (ring == 1) {
                     serverLevel.sendParticles(ParticleTypes.CLOUD, px, groundY + 0.08D, pz, 1, 0.05D, 0.04D, 0.05D, 0.03D);
                 }
-                if (ring == 3 && p % 2 == 0) {
+                if (ring == 4 && p % 2 == 0) {
                     serverLevel.sendParticles(ParticleTypes.HAPPY_VILLAGER, px, groundY + 0.3D, pz, 1, 0.0D, 0.1D, 0.0D, 0.0D);
                 }
             }
@@ -240,7 +240,7 @@ public class SlimySwordItem extends SwordItem {
     }
 
     private static boolean tryDeployOwnedField(ServerLevel serverLevel, double x, double y, double z, UUID ownerUuid) {
-        double minSpacing = SlimeFieldEntity.FIELD_RADIUS * 1.8D;
+        double minSpacing = SlimeFieldEntity.FIELD_RADIUS * 1.75D;
         AABB searchBox = new AABB(
                 x - minSpacing, y - 1.5D, z - minSpacing,
                 x + minSpacing, y + 1.5D, z + minSpacing
