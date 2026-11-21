@@ -41,6 +41,12 @@
   "advancements.slimearisemod.craft_slime_bottle.title": "緊急エアバッグ",
   "advancements.slimearisemod.craft_slime_bottle.description": "スライム入り瓶を作成する",
 
+  "item.slimearisemod.slime_solvent": "粘液溶解液",
+  "entity.slimearisemod.slime_solvent_projectile": "粘液溶解液",
+  "tooltip.slimearisemod.slime_solvent.1": "周囲のスライムに固定ダメージを与え、倒した際に分裂させない",
+  "advancement.slimearisemod.craft_slime_solvent.title": "粘液溶解",
+  "advancement.slimearisemod.craft_slime_solvent.description": "粘液溶解液を作成する",
+
   "item.slimearisemod.blaze_slime_spawn_egg": "ブレイズスライムのスポーンエッグ",
   "item.slimearisemod.rabbit_slime_spawn_egg": "バニースライムのスポーンエッグ",
   "item.slimearisemod.bomb_slime_spawn_egg": "ボムスライムのスポーンエッグ",

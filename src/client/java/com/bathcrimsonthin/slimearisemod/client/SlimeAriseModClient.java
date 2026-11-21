@@ -36,6 +36,7 @@ public class SlimeAriseModClient implements ClientModInitializer {
 		EntityRendererRegistry.register(ModEntities.SLIME_ARROW, SlimeArrowRenderer::new);
 		EntityRendererRegistry.register(ModEntities.STICKY_TORCH_PROJECTILE, ThrownItemRenderer::new);
 		EntityRendererRegistry.register(ModEntities.SLIME_BOTTLE_PROJECTILE, ThrownItemRenderer::new);
+		EntityRendererRegistry.register(ModEntities.SLIME_SOLVENT_PROJECTILE, ThrownItemRenderer::new);
 		// パーティクルのファクトリ登録
 		ParticleFactoryRegistry.getInstance().register(
 				ModParticles.BLAZE_SLIME_PARTICLE,

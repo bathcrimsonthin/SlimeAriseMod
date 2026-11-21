@@ -162,6 +162,16 @@ public class ModEntities {
                     .build("slime_bottle_projectile")
     );
 
+    public static final EntityType<SlimeSolventProjectileEntity> SLIME_SOLVENT_PROJECTILE = Registry.register(
+            BuiltInRegistries.ENTITY_TYPE,
+            ResourceLocation.fromNamespaceAndPath(SlimeAriseMod.MOD_ID, "slime_solvent_projectile"),
+            EntityType.Builder.<SlimeSolventProjectileEntity>of(SlimeSolventProjectileEntity::new, MobCategory.MISC)
+                    .sized(0.25F, 0.25F)
+                    .clientTrackingRange(4)
+                    .updateInterval(10)
+                    .build("slime_solvent_projectile")
+    );
+
     public static void registerModEntities() {
         SlimeAriseMod.LOGGER.info("Registering Mod Entities for " + SlimeAriseMod.MOD_ID);
 

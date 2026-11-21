@@ -1,0 +1,35 @@
+{
+  "parent": "slimearisemod:root",
+  "display": {
+    "icon": {
+      "id": "slimearisemod:slime_solvent"
+    },
+    "title": {
+      "translate": "advancement.slimearisemod.craft_slime_solvent.title"
+    },
+    "description": {
+      "translate": "advancement.slimearisemod.craft_slime_solvent.description"
+    },
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "has_slime_solvent": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "slimearisemod:slime_solvent"
+          }
+        ]
+      }
+    }
+  },
+  "requirements": [
+    [
+      "has_slime_solvent"
+    ]
+  ]
+}

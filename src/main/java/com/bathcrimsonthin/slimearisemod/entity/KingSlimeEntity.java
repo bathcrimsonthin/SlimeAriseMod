@@ -870,10 +870,11 @@ public class KingSlimeEntity extends Slime {
             return;
         }
 
-        boolean isProjectileAttack = damageSource.is(DamageTypeTags.IS_PROJECTILE)
-                || damageSource.getDirectEntity() instanceof Projectile;
+        boolean isSolventAttack = damageSource.getDirectEntity() instanceof SlimeSolventProjectileEntity;
+        boolean isProjectileAttack = !isSolventAttack && (damageSource.is(DamageTypeTags.IS_PROJECTILE)
+                || damageSource.getDirectEntity() instanceof Projectile);
 
-        // 巨大形態（紫ゲージ展開中）は分厚いゼリー装甲により飛翔体ダメージを40%軽減する
+        // 巨大形態（紫ゲージ展開中）は分厚いゼリー装甲により飛翔体ダメージを40%軽減する（粘液溶解液は軽減しない）
         float effectiveDamage = damageAmount;
         if (this.isGiant() && isProjectileAttack) {
             effectiveDamage *= GIANT_PROJECTILE_DAMAGE_MULTIPLIER;
@@ -895,7 +896,7 @@ public class KingSlimeEntity extends Slime {
             this.giantArmorHp -= effectiveDamage;
             if (this.giantArmorHp <= 0.0F) {
                 this.giantArmorHp = 0.0F;
-                this.revertFromGiant();
+                this.revertFromGiant(isSolventAttack);
             }
             return;
         }
@@ -936,9 +937,12 @@ public class KingSlimeEntity extends Slime {
         );
     }
 
-    private void revertFromGiant() {
+    private void revertFromGiant(boolean dissolvedBySolvent) {
         if (this.level() instanceof ServerLevel serverLevel) {
-            int spawnCount = 12 + this.random.nextInt(5);
+            // 粘液溶解液で巨大アーマーを削り切った場合はばら撒くスライム数を大幅に減らす（通常12〜16匹 → 6〜8匹）
+            int spawnCount = dissolvedBySolvent
+                    ? (6 + this.random.nextInt(3))
+                    : (12 + this.random.nextInt(5));
             float modSlimeChance = (this.getHealth() >= this.getMaxHealth() * 0.5F) ? 0.25F : 0.75F;
 
             for (int i = 0; i < spawnCount; i++) {
@@ -969,6 +973,32 @@ public class KingSlimeEntity extends Slime {
                     0.0D,
                     0.0D
             );
+
+            if (dissolvedBySolvent) {
+                this.playSound(SoundEvents.FIRE_EXTINGUISH, 1.0F, 1.35F);
+                serverLevel.sendParticles(
+                        ParticleTypes.BUBBLE_POP,
+                        this.getX(),
+                        this.getY(0.5D),
+                        this.getZ(),
+                        35,
+                        2.5D,
+                        1.5D,
+                        2.5D,
+                        0.08D
+                );
+                serverLevel.sendParticles(
+                        ParticleTypes.CLOUD,
+                        this.getX(),
+                        this.getY(0.5D),
+                        this.getZ(),
+                        20,
+                        2.0D,
+                        1.0D,
+                        2.0D,
+                        0.05D
+                );
+            }
         }
 
         this.setKingState(STATE_NORMAL);

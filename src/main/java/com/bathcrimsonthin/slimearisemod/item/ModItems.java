@@ -153,7 +153,7 @@ public class ModItems {
             new SlimePuddingItem(
                     new Item.Properties()
                             .food(SlimePuddingItem.SLIME_PUDDING_FOOD)
-                            .stacksTo(16)
+//                            .stacksTo(16)
             )
     );
 
@@ -172,6 +172,11 @@ public class ModItems {
             new SlimeBottleItem(new Item.Properties().stacksTo(16))
     );
 
+    public static final Item SLIME_SOLVENT = registerItem(
+            "slime_solvent",
+            new SlimeSolventItem(new Item.Properties().stacksTo(16))
+    );
+
     // 初期化メソッド(onInitializeから呼ぶ)
     public static void registerModItems() {
         SlimeAriseMod.LOGGER.info("Registering Mod Items for " + SlimeAriseMod.MOD_ID);
@@ -179,6 +184,7 @@ public class ModItems {
         DispenserBlock.registerProjectileBehavior(ModItems.SLIME_ARROW);
         DispenserBlock.registerProjectileBehavior(ModItems.STICKY_TORCH);
         DispenserBlock.registerProjectileBehavior(ModItems.SLIME_BOTTLE);
+        DispenserBlock.registerProjectileBehavior(ModItems.SLIME_SOLVENT);
 
 //        // クリエイティブタブへの追加(後で専用タブに変更)
 //        ItemGroupEvents.modifyEntriesEvent(CreativeModeTabs.INGREDIENTS).register(entries -> {

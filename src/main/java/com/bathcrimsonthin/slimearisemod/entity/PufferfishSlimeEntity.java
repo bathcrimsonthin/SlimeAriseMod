@@ -1,5 +1,6 @@
 package com.bathcrimsonthin.slimearisemod.entity;
 
+import com.bathcrimsonthin.slimearisemod.config.SlimeAriseConfig;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.game.ClientboundGameEventPacket;
 import net.minecraft.server.level.ServerPlayer;
@@ -15,6 +16,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.animal.Pufferfish;
+import net.minecraft.world.entity.monster.Creeper;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.monster.Slime;
 import net.minecraft.world.entity.player.Player;
@@ -66,6 +68,7 @@ public class PufferfishSlimeEntity extends Slime {
                 if (pufferfish != null) {
                     pufferfish.moveTo(this.getX(), this.getY(), this.getZ(), this.getYRot(), 0.0F);
                     pufferfish.setPuffState(2);
+                    pufferfish.setNoAi(true);
                     this.level().addFreshEntity(pufferfish);
                     pufferfish.startRiding(this, true);
                 }
@@ -74,6 +77,9 @@ public class PufferfishSlimeEntity extends Slime {
             // 搭乗中のフグの窒息防止・最大膨張の維持・近接毒攻撃処理
             Pufferfish pufferfish = this.getPassengerPufferfish();
             if (pufferfish != null) {
+                if (!pufferfish.isNoAi()) {
+                    pufferfish.setNoAi(true);
+                }
                 pufferfish.setAirSupply(pufferfish.getMaxAirSupply());
                 if (pufferfish.getPuffState() != 2) {
                     pufferfish.setPuffState(2);
@@ -86,6 +92,8 @@ public class PufferfishSlimeEntity extends Slime {
     // 近接攻撃で間合いを取れば回避できつつ、近づきすぎると毒を受ける範囲に調整
     private void applyPufferfishStingAround(Pufferfish pufferfish, int puffState) {
         double stingReach = 0.25D + 0.20D * this.getSize() + 0.10D * puffState;
+        SlimeAriseConfig.PufferfishSlimeAttackMode attackMode =
+                SlimeAriseConfig.get().behavior.pufferfishSlimeAttackMode;
 
         List<LivingEntity> targets = this.level().getEntitiesOfClass(
                 LivingEntity.class,
@@ -108,13 +116,24 @@ public class PufferfishSlimeEntity extends Slime {
                         player.addEffect(new MobEffectInstance(MobEffects.POISON, 60 * puffState, 0), pufferfish);
                     }
                 }
-            } else if (target instanceof Mob mob && !mob.getType().is(EntityTypeTags.AQUATIC)) {
+            } else if (target instanceof Mob mob && this.canAttackMob(mob, attackMode)) {
                 if (mob.hurt(this.damageSources().mobAttack(pufferfish), (float) (1 + puffState))) {
                     mob.addEffect(new MobEffectInstance(MobEffects.POISON, 60 * puffState, 0), pufferfish);
                     pufferfish.playSound(SoundEvents.PUFFER_FISH_STING, 1.0F, 1.0F);
                 }
             }
         }
+    }
+
+    private boolean canAttackMob(Mob mob, SlimeAriseConfig.PufferfishSlimeAttackMode attackMode) {
+        if (mob.getType().is(EntityTypeTags.AQUATIC)) {
+            return false;
+        }
+        return switch (attackMode) {
+            case INDISCRIMINATE -> true;
+            case EXCLUDE_EXPLOSIVE -> !(mob instanceof Creeper || mob instanceof BombSlimeEntity);
+            case NO_MOBS -> false;
+        };
     }
 
     // 中サイズ・大サイズが倒されたときは、分裂時に親のフグが残らないよう消去する
@@ -132,6 +151,15 @@ public class PufferfishSlimeEntity extends Slime {
             this.discardPassengerPufferfish();
         }
         super.remove(reason);
+    }
+
+    // 小サイズ撃破などで騎乗が解除されたときは、フグのAIを有効に戻して通常のフグとして動かす
+    @Override
+    protected void removePassenger(Entity passenger) {
+        super.removePassenger(passenger);
+        if (!this.level().isClientSide && passenger instanceof Pufferfish pufferfish && pufferfish.isAlive()) {
+            pufferfish.setNoAi(false);
+        }
     }
 
     private void discardPassengerPufferfish() {

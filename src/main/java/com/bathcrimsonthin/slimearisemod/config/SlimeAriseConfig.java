@@ -55,6 +55,15 @@ public class SlimeAriseConfig {
         DISABLED
     }
 
+    public enum PufferfishSlimeAttackMode {
+        /** プレイヤーおよび周囲のモブを無差別に攻撃する */
+        INDISCRIMINATE,
+        /** クリーパーやボムスライムなど爆発するモブを除いて攻撃する */
+        EXCLUDE_EXPLOSIVE,
+        /** 他のモブを攻撃しない（プレイヤーのみ攻撃する） */
+        NO_MOBS
+    }
+
     public String _comment_modes = "overworldSpawnMode: DARK_EVERYWHERE / VANILLA / DISABLED | netherSpawnMode: BIOME_AND_FORTRESS / MAGMA_CUBE_LIKE / DISABLED | endSpawnMode: ENABLED / DISABLED";
     public OverworldSpawnMode overworldSpawnMode = OverworldSpawnMode.DARK_EVERYWHERE;
     public NetherSpawnMode netherSpawnMode = NetherSpawnMode.BIOME_AND_FORTRESS;
@@ -92,13 +101,17 @@ public class SlimeAriseConfig {
         public int stackSlimeSize = 2;
     }
 
-    // --- 4. Mod固有ギミックのON/OFF ---
+    // --- 4. Mod固有ギミックのON/OFF・挙動設定 ---
 
     public BehaviorSettings behavior = new BehaviorSettings();
 
     public static class BehaviorSettings {
         /** エンダースライムがブロックを持ち去り・設置するか */
         public boolean allowEnderSlimeBlockGriefing = true;
+
+        public String _comment_pufferfishAttackMode = "pufferfishSlimeAttackMode: INDISCRIMINATE / EXCLUDE_EXPLOSIVE / NO_MOBS";
+        /** フグスライムの対モブ攻撃モード */
+        public PufferfishSlimeAttackMode pufferfishSlimeAttackMode = PufferfishSlimeAttackMode.EXCLUDE_EXPLOSIVE;
     }
 
     // --- 5. スライム種類別の湧き率（weight=0 で個別無効化） ---
@@ -218,6 +231,10 @@ public class SlimeAriseConfig {
         stacking.stackSlimeSize = Math.max(1, stacking.stackSlimeSize);
 
         if (behavior == null) behavior = new BehaviorSettings();
+        if (behavior.pufferfishSlimeAttackMode == null) {
+            behavior.pufferfishSlimeAttackMode = PufferfishSlimeAttackMode.EXCLUDE_EXPLOSIVE;
+        }
+
         if (overworld == null) overworld = new OverworldSpawns();
         if (netherBiomeAndFortress == null) netherBiomeAndFortress = new NetherBiomeSpawns();
         if (netherMagmaCubeLike == null) netherMagmaCubeLike = new NetherMagmaCubeLikeSpawns();
